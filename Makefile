@@ -1,21 +1,30 @@
-.PHONY: setup data features train evaluate app all
-
-setup:
-	uv sync
+.PHONY: data features segment train evaluate explain recommend push web all
 
 data:
 	uv run python src/generate_data.py
 
 features:
-	uv run python src/build_features.py
+	uv run python src/features.py
+
+segment:
+	uv run python src/segment.py
 
 train:
-	uv run python src/train_model.py
+	uv run python src/model.py
 
 evaluate:
-	uv run python src/evaluate_model.py
+	uv run python src/evaluate.py
 
-app:
-	uv run streamlit run app.py
+explain:
+	uv run python src/explain.py
 
-all: setup data features train evaluate
+recommend:
+	uv run python src/recommend.py
+
+push:
+	uv run python src/push_to_supabase.py
+
+web:
+	cd web && npm run dev
+
+all: data features segment train evaluate explain recommend push
