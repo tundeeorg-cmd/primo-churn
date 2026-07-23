@@ -1,0 +1,24 @@
+# Python / uv
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Generated model artifacts — regenerate via `make train`
+outputs/models/*.pkl
+
+# Raw data — regenerate deterministically via `src/generate_data.py` (seed 42)
+data/raw/*.csv
+
+# Safety-copy directories from the oberry migration — never part of the repo
+oberry_backup_*/
+
+# ── DO NOT gitignore the following ─────────────────────────────────────────
+# Streamlit Community Cloud deploys straight from this repo and the dashboard
+# reads these files at runtime. If they're excluded here, the deployed app
+# crashes with a missing-file error that looks unrelated to git.
+#   data/processed/*.csv
+#   outputs/metrics.json
+#   outputs/figures/*.png
