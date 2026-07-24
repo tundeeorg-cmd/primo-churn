@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-07-24T00:41:00.115233+00:00",
+  "train_cutoff": "2026-01-31",
+  "test_cutoff": "2026-04-30",
+  "test_set_size": 14337,
+  "test_churn_rate": 0.19285764106856385,
+  "models": {
+    "logistic_regression": {
+      "roc_auc": 0.8272050950445329,
+      "pr_auc": 0.5531353316907305
+    },
+    "xgboost": {
+      "roc_auc": 0.8914490861210792,
+      "pr_auc": 0.7004103003553135
+    }
+  },
+  "chosen_threshold": {
+    "value": 0.7907924056053162,
+    "precision": 0.7,
+    "recall": 0.5721518987341773,
+    "met_precision_floor": true,
+    "rationale": "Maximizes recall subject to precision >= 0.70 \u2014 missing a departing member costs more than a wasted coupon."
+  },
+  "confusion_matrix": {
+    "true_stay": 10894,
+    "false_alarm": 678,
+    "missed_churn": 1183,
+    "caught_churn": 1582
+  },
+  "model_recall": 0.5721518987341773
+}
