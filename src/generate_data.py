@@ -66,6 +66,11 @@ BEHAVIOR_GAP_DAYS = {
     "casual": (14.0, 32.0),   # 1-2x / month
 }
 
+WIN_BACK_PROB = 0.35  # chance a fully-decayed member gets one surprise
+# reactivation visit instead of going silent for good — see the loop below
+ANOMALOUS_GAP_PROB = 0.07  # chance any single *normal-cadence* gap is
+# stretched (vacation, one-off disinterest) without signaling real risk
+
 BASE_CHURN_PROB = 0.66  # tuned against TIER_CHURN_MULT so the *observed*
 # 60-day-silence rate lands in 22-28%; see the validation summary at the end
 
@@ -217,6 +222,8 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
         else:
             shrink_mult = 1.0
             jitter = rng.uniform(0.7, 1.3)
+            if rng.random() < ANOMALOUS_GAP_PROB:
+                jitter *= rng.uniform(2.5, 5.0)  # one-off stretch, not a churn signal
             gap = base_gap * jitter * season_mult
 
         next_offset = current_offset + gap
@@ -230,7 +237,21 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
         if in_decay:
             decay_step += 1
             if decay_step >= decay_steps_total:
-                break  # decay complete — member goes silent for the rest of the window
+                # Real customers sometimes come back even after drifting
+                # away — a decay that *always* ends in permanent silence
+                # makes churn perfectly predictable from pre-decay signal
+                # alone (Part D: "If the model scores above 0.95 ROC-AUC,
+                # churn has been made too easy to predict — add noise").
+                # Give a minority of decayed members one surprise
+                # reactivation visit before truly going quiet.
+                if rng.random() < WIN_BACK_PROB:
+                    winback_offset = current_offset + rng.uniform(20, 150)
+                    if winback_offset <= WINDOW_DAYS:
+                        record_visit(
+                            WINDOW_START + timedelta(days=winback_offset),
+                            in_decay=False, shrink_mult=1.0,
+                        )
+                break  # decay (and any win-back) complete — silent for the rest of the window
 
     member_row = _member_row(member_id, signup_date, tier, home_branch, age_band, city=BRANCH_CITY[home_branch])
     return member_row, visits
