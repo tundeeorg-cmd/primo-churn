@@ -74,7 +74,11 @@ def _prepare_xy(df: pd.DataFrame, dummy_columns: list[str] | None = None) -> tup
     """Numeric features + one-hot tier. `dummy_columns` (from train) keeps
     train/test aligned even if a tier category is missing from one split."""
     X = df[NUMERIC_FEATURES].copy()
-    tier_dummies = pd.get_dummies(df["tier"], prefix="tier")
+    # .astype(int): pandas' get_dummies defaults to bool dtype, which makes
+    # XGBoost's sklearn wrapper silently set enable_categorical=True during
+    # fit() — and SHAP's interventional TreeExplainer refuses categorical
+    # splits outright. Plain 0/1 ints avoid the whole problem.
+    tier_dummies = pd.get_dummies(df["tier"], prefix="tier").astype(int)
     X = pd.concat([X, tier_dummies], axis=1)
     if dummy_columns is not None:
         X = X.reindex(columns=dummy_columns, fill_value=0)
@@ -146,6 +150,9 @@ def main() -> None:
         scale_pos_weight=scale_pos_weight,
         eval_metric="logloss",
         random_state=RANDOM_STATE,
+        enable_categorical=False,  # none of our features are categorical —
+        # this xgboost version defaults it to True regardless, which SHAP's
+        # interventional TreeExplainer (needed for explain.py) refuses outright
     )
     search = RandomizedSearchCV(
         xgb_base, param_dist, n_iter=20, scoring="roc_auc",
