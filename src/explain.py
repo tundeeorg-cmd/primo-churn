@@ -102,6 +102,45 @@ def phrase(feature: str, value: float) -> str:
     return fn(value)
 
 
+def make_member_explainer(
+    test_df: pd.DataFrame, X: pd.DataFrame, feature_cols: list[str], xgb_model,
+) -> Callable[..., list[str]]:
+    """Build the probability-space SHAP explainer once and return a reusable
+    explain_member(member_id, top_n=3) -> list[str] closure over it.
+
+    Interventional perturbation + a background sample gives SHAP values in
+    PROBABILITY space directly — "+31 points of risk" needs to be
+    percentage points of predicted probability, not raw log-odds. Building
+    the explainer once and reusing it (rather than reconstructing it per
+    call) matters for callers like recommend.py that explain hundreds of
+    members: the background sample and explainer setup are the expensive
+    part, not any individual member's SHAP values.
+    """
+    background = X.sample(n=min(200, len(X)), random_state=42)
+    prob_explainer = shap.TreeExplainer(
+        xgb_model, data=background, feature_perturbation="interventional", model_output="probability"
+    )
+
+    def explain_member(member_id: str, top_n: int = 3) -> list[str]:
+        matches = test_df.index[test_df["member_id"] == member_id]
+        if len(matches) == 0:
+            raise KeyError(f"member_id {member_id!r} not found in the test-set feature table")
+        pos = matches[0]
+        row = X.iloc[[pos]]
+        sv = prob_explainer.shap_values(row)[0]
+        order = np.argsort(sv)[::-1][:top_n]
+        sentences = []
+        for i in order:
+            feat = feature_cols[i]
+            val = row.iloc[0][feat]
+            pts = sv[i] * 100
+            sign = "+" if pts >= 0 else ""
+            sentences.append(f"{phrase(feat, val)} ({sign}{pts:.0f} points of risk)")
+        return sentences
+
+    return explain_member
+
+
 def main() -> None:
     preprocessing = joblib.load(MODELS_DIR / "preprocessing.pkl")
     imputer, feature_cols = preprocessing["imputer"], preprocessing["feature_columns"]
@@ -147,30 +186,7 @@ def main() -> None:
     plt.close(fig)
 
     # ── Per-member probability-space SHAP (for explain_member) ─────────
-    # Interventional perturbation + a background sample gives SHAP values
-    # in PROBABILITY space directly — "+31 points of risk" needs to be
-    # percentage points of predicted probability, not raw log-odds.
-    background = X.sample(n=min(200, len(X)), random_state=42)
-    prob_explainer = shap.TreeExplainer(
-        xgb_model, data=background, feature_perturbation="interventional", model_output="probability"
-    )
-
-    def explain_member(member_id: str, top_n: int = 3) -> list[str]:
-        matches = test_df.index[test_df["member_id"] == member_id]
-        if len(matches) == 0:
-            raise KeyError(f"member_id {member_id!r} not found in the test-set feature table")
-        pos = matches[0]
-        row = X.iloc[[pos]]
-        sv = prob_explainer.shap_values(row)[0]
-        order = np.argsort(sv)[::-1][:top_n]
-        sentences = []
-        for i in order:
-            feat = feature_cols[i]
-            val = row.iloc[0][feat]
-            pts = sv[i] * 100
-            sign = "+" if pts >= 0 else ""
-            sentences.append(f"{phrase(feat, val)} ({sign}{pts:.0f} points of risk)")
-        return sentences
+    explain_member = make_member_explainer(test_df, X, feature_cols, xgb_model)
 
     # Demo on a genuinely at-risk member so the printed example is meaningful.
     xgb_proba = xgb_model.predict_proba(X)[:, 1]
