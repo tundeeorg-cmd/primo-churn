@@ -1,4 +1,4 @@
-.PHONY: data features segment train evaluate explain recommend push web all
+.PHONY: data features segment train evaluate explain recommend push deck web all
 
 data:
 	uv run python src/generate_data.py
@@ -23,6 +23,9 @@ recommend:
 
 push:
 	uv run python src/push_to_supabase.py
+
+deck:
+	uv run python src/build_deck.py
 
 web:
 	cd web && npm run dev
