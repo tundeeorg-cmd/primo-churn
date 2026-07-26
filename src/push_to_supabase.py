@@ -37,12 +37,20 @@ BATCH_SIZE = 1000
 # table name -> (source CSV, primary-key column, sentinel value that can
 # never match a real row, used to build a delete-all filter since PostgREST
 # requires a filter on delete rather than a bare TRUNCATE).
+#
+# Order here is INSERT order — parents before children, since
+# at_risk_members.member_id FKs to members and actions.segment FKs to
+# segments. DELETE_ORDER below is the reverse: a leftover child row from
+# the previous run would otherwise block deleting the parent it
+# references, so every delete must happen child-first regardless of
+# insert order.
 TEXT_PK_TABLES: dict[str, tuple[str, str]] = {
     "members": ("members_scored.csv", "member_id"),
-    "at_risk_members": ("at_risk_members.csv", "member_id"),
     "segments": ("segments.csv", "segment"),
+    "at_risk_members": ("at_risk_members.csv", "member_id"),
     "actions": ("actions.csv", "segment"),
 }
+DELETE_ORDER: list[str] = list(reversed(TEXT_PK_TABLES)) + ["metrics"]
 NEVER_MATCHES = "__truncate_sentinel__"
 
 
@@ -106,8 +114,8 @@ def _records(csv_name: str) -> list[dict]:
     return json.loads(df.to_json(orient="records"))
 
 
-def _delete_all(client: Client, table: str, pk_col: str) -> None:
-    client.table(table).delete().neq(pk_col, NEVER_MATCHES).execute()
+def _delete_all(client: Client, table: str, pk_col: str, sentinel: str | int = NEVER_MATCHES) -> None:
+    client.table(table).delete().neq(pk_col, sentinel).execute()
 
 
 def _insert_batched(client: Client, table: str, records: list[dict]) -> None:
@@ -137,22 +145,31 @@ def main() -> None:
     print("Pushing to Supabase — truncate + re-insert, batched at "
           f"{BATCH_SIZE} rows.\n")
 
-    expected_counts: dict[str, int] = {}
-
-    for table, (csv_name, pk_col) in TEXT_PK_TABLES.items():
-        records = _records(csv_name)
-        print(f"{table}: {len(records):,} rows from {csv_name}")
-        _delete_all(client, table, pk_col)
-        _insert_batched(client, table, records)
-        expected_counts[table] = len(records)
-
-    # metrics: singleton row, id pinned to 1 — delete-then-insert same as
-    # the others for consistency, rather than a special-cased upsert.
+    records_by_table = {table: _records(csv) for table, (csv, _) in TEXT_PK_TABLES.items()}
     metrics_row = _load_metrics_row()
-    print(f"metrics: 1 row from {METRICS_PATH.name}")
-    _delete_all(client, "metrics", "id")
-    client.table("metrics").insert(metrics_row).execute()
+    expected_counts = {table: len(recs) for table, recs in records_by_table.items()}
     expected_counts["metrics"] = 1
+
+    # ── Delete phase — children before parents (DELETE_ORDER), so a
+    # leftover child row from a previous run never blocks clearing its
+    # parent table. ────────────────────────────────────────────────────
+    print("Clearing existing rows...")
+    for table in DELETE_ORDER:
+        pk_col = "id" if table == "metrics" else TEXT_PK_TABLES[table][1]
+        sentinel = -1 if table == "metrics" else NEVER_MATCHES
+        _delete_all(client, table, pk_col, sentinel=sentinel)
+        print(f"  {table}: cleared")
+
+    # ── Insert phase — parents before children (TEXT_PK_TABLES' own
+    # order). ────────────────────────────────────────────────────────
+    print("\nInserting...")
+    for table, (csv_name, _) in TEXT_PK_TABLES.items():
+        records = records_by_table[table]
+        print(f"  {table}: {len(records):,} rows from {csv_name}")
+        _insert_batched(client, table, records)
+
+    print(f"  metrics: 1 row from {METRICS_PATH.name}")
+    client.table("metrics").insert(metrics_row).execute()
 
     print("\nVerifying row counts (read-back)...")
     for table, expected in expected_counts.items():
