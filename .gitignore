@@ -31,3 +31,4 @@ oberry_backup_*/
 #   data/processed/*.csv
 #   outputs/metrics.json
 #   outputs/figures/*.png
+.vercel
