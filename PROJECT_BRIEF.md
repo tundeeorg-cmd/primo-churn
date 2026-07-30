@@ -818,3 +818,92 @@ figures and the *live dashboard* diverge from each other instead of (as now) div
 the site chrome, trading one inconsistency for a different one. `outputs/primo_churn_deck.pptx`
 (Prompt 14) uses the same palette too, so a real fix touches three artifacts, not one file.
 A Python-tier task, deliberately not attempted in this web-only pass.
+
+---
+
+## Part L — Repo cleanup & public-portfolio audit
+
+The repo went from "internal working tree" to "public portfolio artifact, linked in a
+university application" in one pass (secrets scan → file hygiene → code cleanup → formatting
+→ docs → attribution → git-identity fix → verify → push). What follows is structure and
+findings a future session shouldn't have to rediscover.
+
+**Current repo structure:**
+
+```
+primo-churn/
+├── README.md              rewritten — synthetic-data notice near the top, baseline
+│                           reported alongside model numbers, methodology section visible
+├── PROJECT_BRIEF.md        this file — the build brief/prompt pack, kept at root
+│                           (deliberate: transparency about how the project was built)
+├── LICENSE                 MIT, 2026, Jenissa Vichiansin
+├── impact_writeup.md       NOT PRESENT — Prompt 15 called for it, never written (see below)
+├── data/{raw,processed}/   unchanged
+├── src/                    unchanged, every script now has an "# Author:" line after its
+│                           module docstring (not inside it)
+├── supabase/, notebooks/, outputs/, web/  unchanged
+└── docs/
+    └── archive/
+        └── README_scaffolding.md   the pre-launch placeholder README, dated + noted
+```
+
+**Findings worth remembering, so they aren't re-litigated:**
+
+- **The codebase was already close to clean before this pass.** Every `src/*.py` script
+  already had a module docstring, root-relative paths via `Path(__file__).resolve().parent`,
+  zero dead code, and zero debug `print()`s — the 83 `print()` calls across the pipeline are
+  all the intentional CLI summary output the brief itself specified, and stayed untouched.
+  TypeScript was already at zero unused imports/`console.log`/`@ts-ignore` before any cleanup
+  started. The real cleanup work was small: one unused dependency (`seaborn`), one unused
+  import (`sys` in `push_to_supabase.py`), three redundant local re-imports in
+  `build_deck.py`, five unused `create-next-app` scaffold SVGs, plus a first-ever black/ruff/
+  prettier pass (the codebase had never been run through a formatter before).
+
+- **"Recency-only baseline" doesn't exist as a model in this codebase.** Only a majority-class
+  `DummyClassifier` baseline exists (`src/model.py`). Used and correctly labeled that in the
+  README rather than inventing a new model or mislabeling the existing one.
+
+- **Gap: the baseline's own precision/recall/accuracy were never persisted anywhere.**
+  `evaluate.py` only scores the two trained models (logistic regression, XGBoost) — the
+  baseline's numbers live only in `model.py`'s printed comparison table, gone the moment the
+  terminal closes. The README's baseline numbers were computed on demand by loading
+  `outputs/models/baseline.pkl` and scoring it against the exact same test set/preprocessing
+  `evaluate.py` uses. If `evaluate.py` is ever touched again, consider persisting the
+  baseline's metrics into `metrics.json` too — didn't do it during cleanup since that's a
+  logic change, not cleanup.
+
+- **Gap: `impact_writeup.md` was never created.** `PROJECT_BRIEF.md` Prompt 15 calls for it
+  (a one-page plain-language results summary). Flagged, not written — that's new content, not
+  cleanup, and wasn't asked for in the cleanup pass.
+
+- **Gap: SHAP beeswarm doesn't reproduce bit-for-bit.** Verified via a full clean-state
+  pipeline re-run (`make data features segment train evaluate explain recommend`) and diffed
+  against the previously-committed outputs: all 5 processed CSVs and every metric in
+  `metrics.json` matched exactly, and 7 of 8 figures were byte-identical. Only
+  `13_shap_beeswarm.png` differed — the run log shows SHAP's own internal background
+  subsampling ("200 samples but max_samples=100... subsampling") isn't bound to
+  `explain.py`'s `random_state=42` the same way the rest of the pipeline is. A genuine, minor
+  gap in the Part F #7 "seed everything" discipline. Not fixed.
+
+- **`make push` was deliberately not run during verification.** It truncates and re-inserts
+  the live Supabase tables the deployed dashboard reads from — a production-affecting,
+  hard-to-reverse action, different in kind from local reproducibility checks. Re-run it
+  manually when there's an actual reason to refresh production data, not as part of a repo
+  cleanup's "does the pipeline still run" check.
+
+- **Git identity was broken, not just mismatched.** No `user.name`/`user.email` was configured
+  anywhere (local or global) — git had been auto-deriving a non-real
+  `21626@E2821626.local` identity for 20 of 21 commits, plus one commit under a different
+  identity again. Fixed going forward only: this repo's local config now sets
+  `Jenissa Vichiansin <tundee.org@gmail.com>` — the verified primary email on the
+  `tundeeorg-cmd` GitHub account that actually hosts and deploys this repo (confirmed
+  directly from that account's Settings → Emails page, not guessed). The 21 pre-existing
+  commits were **not** rewritten — no explicit go-ahead was given for that, and the brief was
+  explicit that a history rewrite (every SHA changes) needs a deliberate, separate decision,
+  not a default.
+
+- **Reproducibility, confirmed for real, not just claimed.** A genuinely clean-state pipeline
+  run reproduced every tracked processed CSV byte-for-byte and every metric value exactly
+  (only `metrics.json`'s `generated_at` timestamp differed, correctly — it's a real
+  timestamp, not seeded). This is a real, checked property of the pipeline now, not an
+  assumption.
