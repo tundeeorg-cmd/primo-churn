@@ -1,28 +1,36 @@
 import Dashboard from "@/components/Dashboard";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { getActiveMemberCount, getAtRiskMembers, getMetrics, getSegments } from "@/lib/queries";
+import { getServerLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n";
 
 // Fresh data on every request — this reads live from Supabase, not a
 // build-time snapshot (PROJECT_BRIEF.md Prompt 11).
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [atRiskMembers, segments, metrics, activeMemberCount] = await Promise.all([
+  const [atRiskMembers, segments, metrics, activeMemberCount, locale] = await Promise.all([
     getAtRiskMembers(),
     getSegments(),
     getMetrics(),
     getActiveMemberCount(),
+    getServerLocale(),
   ]);
 
   return (
     <main className="flex-1 max-w-[1200px] w-full mx-auto px-6 py-10">
-      <header className="mb-6">
-        <p className="text-xs font-medium uppercase tracking-wide text-teal mb-1">PRIMO Churn Radar</p>
-        <h1 className="font-display text-2xl sm:text-3xl font-semibold text-navy">
-          Oberry Member Retention Radar
-        </h1>
-        <p className="text-sm text-ink-muted mt-1">
-          Members who need attention today, ranked by how much is riding on getting to them first.
-        </p>
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-teal">{t(locale, "brand.overline")}</p>
+            <span className="text-xs text-ink-muted">· {t(locale, "dashboard.updatedDaily")}</span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-navy">
+            {t(locale, "brand.dashboardTitle")}
+          </h1>
+          <p className="text-sm text-ink-muted mt-1">{t(locale, "dashboard.subtitle")}</p>
+        </div>
+        <LanguageSwitcher />
       </header>
 
       <Dashboard
@@ -33,8 +41,7 @@ export default async function DashboardPage() {
       />
 
       <footer className="mt-10 pt-6 border-t border-line text-xs text-ink-muted">
-        Illustrative figures · synthetic data. Oberry is a fictional café chain used to
-        demonstrate PRIMO&apos;s churn-prediction engine.
+        {t(locale, "dashboard.footerNote")}
       </footer>
     </main>
   );

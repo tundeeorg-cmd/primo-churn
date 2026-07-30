@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { AtRiskMember, Metrics, Segment } from "@/lib/supabase";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { formatCount, formatThbCompact } from "@/lib/i18n/format";
 import AtRiskTable from "./AtRiskTable";
 import DashboardControls from "./DashboardControls";
 import KpiRow from "./KpiRow";
@@ -15,9 +17,8 @@ interface Props {
   activeMemberCount: number;
 }
 
-const thbCompact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
-
 export default function Dashboard({ atRiskMembers, segments, metrics, activeMemberCount }: Props) {
+  const { locale, t, tf } = useLanguage();
   const minThreshold = metrics?.threshold_value ?? 0.5;
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -90,21 +91,21 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
     <div className="space-y-6">
       <KpiRow
         items={[
-          { label: "Active members", value: activeMemberCount.toLocaleString() },
+          { label: t("kpi.activeMembers"), value: formatCount(activeMemberCount, locale) },
           {
-            label: "Flagged at-risk",
-            value: filtered.length.toLocaleString(),
-            caption: hasActiveFilters ? "matching current filters" : "at the model's chosen threshold",
+            label: t("kpi.flaggedAtRisk"),
+            value: formatCount(filtered.length, locale),
+            caption: hasActiveFilters ? t("kpi.flaggedCaptionFiltered") : t("kpi.flaggedCaptionThreshold"),
           },
           {
-            label: "Revenue at risk (30d)",
-            value: `฿${thbCompact.format(revenueAtRisk30d)}`,
-            caption: "trailing-12mo spend of flagged members ÷ 12",
+            label: t("kpi.revenueAtRisk"),
+            value: formatThbCompact(revenueAtRisk30d, locale),
+            caption: t("kpi.revenueAtRiskCaption"),
           },
           {
-            label: "Model recall",
+            label: t("kpi.modelRecall"),
             value: metrics ? `${(metrics.model_recall * 100).toFixed(0)}%` : "—",
-            caption: metrics ? `at ${(metrics.threshold_precision * 100).toFixed(0)}% precision` : undefined,
+            caption: metrics ? tf("kpi.modelRecallCaption", { precision: (metrics.threshold_precision * 100).toFixed(0) }) : undefined,
           },
         ]}
       />

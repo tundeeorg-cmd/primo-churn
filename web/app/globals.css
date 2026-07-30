@@ -19,14 +19,46 @@
   --color-ink-muted: #5b6773;
   --color-line: #e4e1d8;
 
+  /* These theme tokens read from --font-display/--font-body/--font-tabular
+     (set below, NOT the -base variables next/font assigns directly) so
+     that :lang(th) can override just those and layer the Thai font in
+     front — see the :lang(th) block below. */
   --font-display: var(--font-display);
   --font-body: var(--font-body);
   --font-tabular: var(--font-tabular);
 }
 
+/* Default (English): theme tokens point straight at the Latin faces. */
+:root {
+  --font-display: var(--font-display-base);
+  --font-body: var(--font-body-base);
+  --font-tabular: var(--font-tabular-base);
+}
+
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
+}
+
+/*
+ * i18n Step 4 — Thai typography. These are real bugs if skipped, not
+ * cosmetic: the tighter Latin line-height clips Thai vowels/tone marks,
+ * and Thai has no inter-word spaces for the browser to break on.
+ */
+:lang(th) {
+  /* 4.1 — proper Thai typeface, existing Latin face as fallback in the
+     same stack (not a separate stack swapped by language). Scoped to
+     :lang(th) so English-mode pages are byte-for-byte unchanged. */
+  --font-display: var(--font-thai), var(--font-display-base);
+  --font-body: var(--font-thai), var(--font-body-base);
+
+  /* 4.2 — Thai stacks vowels above and tone marks below the baseline. */
+  line-height: 1.7;
+
+  /* 4.3 — Thai has no spaces between words; break at natural boundaries
+     only, never mid-syllable. Do NOT use break-all here. */
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 /* Ranked-table numeric columns — tabular figures so digits align down a

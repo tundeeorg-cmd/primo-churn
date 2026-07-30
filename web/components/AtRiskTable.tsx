@@ -2,6 +2,9 @@
 
 import type { AtRiskMember } from "@/lib/supabase";
 import { riskBadge, segmentColor } from "@/lib/theme";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { segmentLabel, tierLabel } from "@/lib/i18n/labels";
+import { formatThb } from "@/lib/i18n/format";
 
 interface Props {
   members: AtRiskMember[];
@@ -9,16 +12,14 @@ interface Props {
   onSelect: (memberId: string) => void;
 }
 
-const thb = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-
 export default function AtRiskTable({ members, selectedId, onSelect }: Props) {
+  const { locale, t } = useLanguage();
+
   if (members.length === 0) {
     return (
       <div className="rounded-xl border border-line bg-paper p-8 text-center">
-        <p className="font-display text-lg text-navy mb-1">No members match these filters</p>
-        <p className="text-sm text-ink-muted">
-          Try lowering the risk threshold, or clear a segment/tier filter above.
-        </p>
+        <p className="font-display text-lg text-navy mb-1">{t("table.emptyTitle")}</p>
+        <p className="text-sm text-ink-muted">{t("table.emptyBody")}</p>
       </div>
     );
   }
@@ -39,11 +40,11 @@ export default function AtRiskTable({ members, selectedId, onSelect }: Props) {
       <table className="w-full text-sm border-collapse">
         <thead>
           <tr className="sticky top-0 z-10 border-b border-line bg-canvas text-left text-xs uppercase tracking-wide text-ink-muted">
-            <th className="px-4 py-3 font-medium">Member</th>
-            <th className="px-4 py-3 font-medium">Tier</th>
-            <th className="px-4 py-3 font-medium">Segment</th>
-            <th className="px-4 py-3 font-medium text-right">Value at risk</th>
-            <th className="px-4 py-3 font-medium text-right">Risk</th>
+            <th className="px-4 py-3 font-medium">{t("table.colMember")}</th>
+            <th className="px-4 py-3 font-medium">{t("common.tier")}</th>
+            <th className="px-4 py-3 font-medium">{t("common.segment")}</th>
+            <th className="px-4 py-3 font-medium text-right">{t("table.colValueAtRisk")}</th>
+            <th className="px-4 py-3 font-medium text-right">{t("common.risk")}</th>
           </tr>
         </thead>
         <tbody>
@@ -62,7 +63,7 @@ export default function AtRiskTable({ members, selectedId, onSelect }: Props) {
                 }`}
               >
                 <td className="px-4 py-3 tabular-figures text-ink">{m.member_id}</td>
-                <td className="px-4 py-3 text-ink-muted">{m.tier}</td>
+                <td className="px-4 py-3 text-ink-muted">{tierLabel(m.tier)}</td>
                 <td className="px-4 py-3">
                   <span className="inline-flex items-center gap-1.5">
                     <span
@@ -70,11 +71,11 @@ export default function AtRiskTable({ members, selectedId, onSelect }: Props) {
                       style={{ backgroundColor: segmentColor(m.segment) }}
                       aria-hidden="true"
                     />
-                    <span className="text-ink-muted">{m.segment}</span>
+                    <span className="text-ink-muted">{segmentLabel(m.segment, locale)}</span>
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right tabular-figures font-medium text-navy">
-                  ฿{thb.format(m.annual_value_thb)}
+                  {formatThb(m.annual_value_thb, locale)}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <span

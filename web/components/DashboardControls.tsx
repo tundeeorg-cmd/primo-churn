@@ -1,6 +1,9 @@
 "use client";
 
 import { SEGMENT_ORDER, segmentColor } from "@/lib/theme";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { segmentLabel, tierLabel } from "@/lib/i18n/labels";
+import { formatCount } from "@/lib/i18n/format";
 
 const TIERS = ["Bronze", "Silver", "Gold"];
 
@@ -31,23 +34,25 @@ export default function DashboardControls({
   visibleCount,
   totalCount,
 }: Props) {
+  const { locale, t, tf } = useLanguage();
+
   return (
     <div className="rounded-xl border border-line bg-paper p-5 space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">Filters</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">{t("controls.filters")}</p>
         {hasActiveFilters && (
           <button
             type="button"
             onClick={onClear}
             className="text-xs text-navy hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy rounded"
           >
-            Clear filters
+            {t("controls.clearFilters")}
           </button>
         )}
       </div>
 
       <div>
-        <p className="text-xs text-ink-muted mb-2">Segment</p>
+        <p className="text-xs text-ink-muted mb-2">{t("common.segment")}</p>
         <div className="flex flex-wrap gap-2">
           {SEGMENT_ORDER.map((seg) => {
             const active = activeSegments.has(seg);
@@ -64,7 +69,7 @@ export default function DashboardControls({
                 }`}
                 style={active ? { backgroundColor: segmentColor(seg) } : undefined}
               >
-                {seg}
+                {segmentLabel(seg, locale)}
               </button>
             );
           })}
@@ -72,7 +77,7 @@ export default function DashboardControls({
       </div>
 
       <div>
-        <p className="text-xs text-ink-muted mb-2">Tier</p>
+        <p className="text-xs text-ink-muted mb-2">{t("common.tier")}</p>
         <div className="flex flex-wrap gap-2">
           {TIERS.map((tier) => {
             const active = activeTiers.has(tier);
@@ -88,7 +93,7 @@ export default function DashboardControls({
                     : "border-line text-ink-muted hover:border-navy/40"
                 }`}
               >
-                {tier}
+                {tierLabel(tier)}
               </button>
             );
           })}
@@ -98,7 +103,7 @@ export default function DashboardControls({
       <div>
         <div className="flex items-center justify-between mb-2">
           <label htmlFor="risk-threshold" className="text-xs text-ink-muted">
-            Minimum risk to flag
+            {t("controls.minRiskToFlag")}
           </label>
           <span className="tabular-figures text-xs font-semibold text-navy">
             {(riskThreshold * 100).toFixed(0)}%+
@@ -115,8 +120,10 @@ export default function DashboardControls({
           className="w-full accent-navy"
         />
         <p className="mt-2 text-xs text-ink-muted">
-          <span className="tabular-figures font-medium text-ink">{visibleCount.toLocaleString()}</span> of{" "}
-          {totalCount.toLocaleString()} flagged members meet this bar.
+          {tf("controls.meetBar", {
+            visible: formatCount(visibleCount, locale),
+            total: formatCount(totalCount, locale),
+          })}
         </p>
       </div>
     </div>

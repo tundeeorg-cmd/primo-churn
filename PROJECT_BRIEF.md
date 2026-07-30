@@ -680,3 +680,75 @@ threshold slider, then the project page (the dashboard alone is enough). Protect
 and the dashboard — the story and the tool are what people remember. The web layer is the
 riskiest part of this schedule, so if day 14 arrives with the ML unfinished, finish the ML
 and ship screenshots instead of a live site.
+
+---
+
+## Part J — i18n (Thai/English, added post-launch)
+
+`/dashboard` is bilingual, Thai default, English switchable. `/` (the public project page)
+is still English-only — this was a deliberate scoping decision, not an oversight; the
+glossary and effort for this pass only covered the dashboard. Decisions below exist so a
+future session doesn't re-derive or re-litigate them.
+
+**Approach — no i18n library.** `next-intl`/`react-i18next` were deliberately skipped for a
+dashboard this size; a dependency-free approach is less likely to break the Vercel build and
+easier to reason about. Everything lives under `web/lib/i18n/`:
+- `th.ts` / `en.ts` — flat, dot-namespaced dictionaries (`"kpi.activeMembers"`, etc.).
+  `en.ts` is typed `Record<keyof typeof th, string>`, so a key present in one file and
+  missing from the other **fails `next build`** — that's the actual enforcement mechanism,
+  not a manual check.
+- `index.ts` — the `Locale` type, `t(locale, key)` (returns the key itself if a translation
+  is missing, so gaps are visible on screen rather than silently blank), and `tf()` for the
+  handful of `{var}`-interpolated strings.
+- `labels.ts` — display-layer lookups from raw Supabase enum values (`segment`, `tier`,
+  `riskBadge().label`) to translated text. **Never** touch the underlying value — filtering,
+  Set membership, and Recharts `dataKey` all keep comparing/using the raw English string from
+  Supabase / `src/segment.py`. Only the rendered JSX text node goes through these.
+- `format.ts` — locale-aware currency/date/count formatting (see Gregorian note below).
+- `LanguageProvider.tsx` / `useLanguage()` — client context; switching calls
+  `router.refresh()`, which re-renders Server Components (translated header strings,
+  `<html lang>`) without remounting the Client Component tree, so filters and the selected
+  member in `Dashboard.tsx`'s `useState` survive a language switch.
+- `cookie.ts` (client-safe) vs. `server.ts` (`next/headers`, server-only) are split into two
+  files on purpose — `LanguageProvider.tsx` is a Client Component, and importing a module
+  that pulls in `next/headers` anywhere in a Client Component's import graph fails the build.
+
+**Cookie-based locale.** Cookie name `locale`, `path=/`, `max-age` 1 year. Read server-side
+in the root layout (`getServerLocale()`) so the very first render already matches the saved
+language — no flash of English before Thai loads. **Side effect:** calling `cookies()`
+anywhere in the tree opts the whole app into dynamic rendering, so `/` went from statically
+generated to server-rendered per request (`ƒ` instead of a static route in the build output).
+Accepted tradeoff for correctness over static prerendering on what is a low-traffic internal
+dashboard.
+
+**Thai-default decision.** No cookie present → defaults to `'th'`, not `'en'`. PRIMO is a
+Thai company and the dashboard's exec audience reads Thai; English-only read as a foreign
+demo rather than something built for their market.
+
+**Gregorian-calendar decision.** `th-TH` defaults to the Buddhist Era (e.g. `2569`) unless
+the Gregorian calendar is explicitly requested via the `-u-ca-gregory` locale extension.
+`lib/i18n/format.ts`'s `formatDate()` opts out of the Thai default deliberately — a BE year
+in a business dashboard reads as a bug to half the audience. (No dashboard component
+currently renders a date — `Metrics.generated_at`/`train_cutoff`/`test_cutoff` aren't
+displayed anywhere yet — so this is exercised the moment that changes, not today.)
+
+**Known, deliberate gaps — don't "fix" these without a product conversation first:**
+- `reason_1`/`reason_2`/`reason_3` (SHAP explanations, e.g. *"68 days since last visit (+31
+  points of risk)"*) stay English, with a small "(ต้นฉบับภาษาอังกฤษ)" note. They're
+  per-member sentences generated in Python with numbers baked in — no finite key space for a
+  display-layer dictionary. Translating them properly would mean changing `src/explain.py`
+  to emit structured data (metric + value) instead of prose, which is a Python-tier change,
+  not a web-tier one.
+- `recommended_action` **is** translated, but via a lookup keyed on the member's `segment`
+  field (a clean 5-value enum), not by string-matching the English sentence text from
+  Supabase — matching sentence text would silently stop working the moment
+  `src/recommend.py`'s wording changes.
+- Tier names (Bronze/Silver/Gold) stay in Latin script in both locales, same treatment as
+  "PRIMO"/"Oberry".
+- `riskBadge()` in `lib/theme.ts` only ever produces three buckets — `"Elevated"` (<0.8),
+  `"High"` (≥0.8), `"Very high"` (≥0.9) — never `"Low"` in practice, since every
+  `at_risk_members` row already cleared the model's threshold. `"Elevated"` maps to the
+  glossary's `risk.medium` (ปานกลาง).
+- `kpi.daysSinceLastActivity` and `action.launchCampaign` are defined in both dictionaries
+  (glossary completeness) but have no current UI call site — no component displays recency,
+  and there's no real "launch campaign" button yet.
