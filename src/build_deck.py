@@ -297,7 +297,6 @@ def build_slide_3(prs, n):
     y = Inches(1.9)
     for name in seg_order:
         row = by_name.loc[name]
-        from pptx.enum.shapes import MSO_SHAPE
         dot = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(8.6), y + Inches(0.08), Inches(0.22), Inches(0.22))
         dot.fill.solid()
         dot.fill.fore_color.rgb = colors[name]
@@ -392,7 +391,6 @@ def build_slide_6(prs, n):
     top += Inches(0.45)
     for i, (seg, risk, action, color) in enumerate(rows):
         y = top + row_h * i
-        from pptx.enum.shapes import MSO_SHAPE
         dot = s.shapes.add_shape(MSO_SHAPE.OVAL, col_x[0], y + Inches(0.1), Inches(0.16), Inches(0.16))
         dot.fill.solid()
         dot.fill.fore_color.rgb = color

@@ -201,9 +201,7 @@ markupsafe==3.0.3
     #   jinja2
     #   nbconvert
 matplotlib==3.11.1
-    # via
-    #   primo-churn
-    #   seaborn
+    # via primo-churn
 matplotlib-inline==0.2.2
     # via
     #   ipykernel
@@ -244,7 +242,6 @@ numpy==2.3.5
     #   primo-churn
     #   scikit-learn
     #   scipy
-    #   seaborn
     #   shap
     #   xgboost
 nvidia-nccl-cu12==2.30.7 ; sys_platform == 'linux'
@@ -263,7 +260,6 @@ packaging==26.2
 pandas==3.0.3
     # via
     #   primo-churn
-    #   seaborn
     #   shap
 pandocfilters==1.5.1
     # via nbconvert
@@ -374,8 +370,6 @@ scipy==1.18.0
     #   scikit-learn
     #   shap
     #   xgboost
-seaborn==0.13.2
-    # via primo-churn
 send2trash==2.1.0
     # via jupyter-server
 shap==0.52.0
