@@ -1,10 +1,14 @@
 # Python / uv
 .venv/
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
 
 # macOS
 .DS_Store
+
+# Logs
+*.log
 
 # Secrets — never commit real credentials. See .env.example for what's required.
 .env
