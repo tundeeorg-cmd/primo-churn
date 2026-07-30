@@ -11,6 +11,7 @@ example client.
 - **Repo:** https://github.com/tundeeorg-cmd/primo-churn.git
 - **Local path:** `~/Desktop/primo-churn` (renamed from `~/Desktop/oberry`)
 - **Stack:** Claude Code · Python · Supabase (Postgres) · Next.js · Vercel
+- **Author:** Jenissa Vichiansin — International School Bangkok
 
 ---
 

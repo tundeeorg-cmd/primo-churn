@@ -17,6 +17,8 @@ Required env vars (repo-root .env, python-dotenv):
                             anywhere else in this repo. Never printed.
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import json

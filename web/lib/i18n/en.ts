@@ -16,6 +16,7 @@ export const en: Record<keyof typeof th, string> = {
   "footer.syntheticNote":
     "Illustrative figures · synthetic data. Oberry is a fictional café chain used to demonstrate PRIMO's churn-prediction engine.",
   "footer.sourceOnGithub": "Source on GitHub",
+  "footer.author": "Jenissa Vichiansin — International School Bangkok",
 
   "nav.openRadar": "Open the Radar",
 

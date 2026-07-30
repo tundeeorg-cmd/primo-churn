@@ -16,6 +16,8 @@ Outputs:
 Seed: 42.
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta

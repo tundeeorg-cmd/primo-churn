@@ -52,8 +52,9 @@ export default async function DashboardPage() {
         activeMemberCount={activeMemberCount}
       />
 
-      <footer className="mt-10 pt-6 border-t border-line text-xs text-ink-muted">
-        {t(locale, "footer.syntheticNote")}
+      <footer className="mt-10 pt-6 border-t border-line text-xs text-ink-muted space-y-1">
+        <p>{t(locale, "footer.syntheticNote")}</p>
+        <p>{t(locale, "footer.author")}</p>
       </footer>
     </main>
   );

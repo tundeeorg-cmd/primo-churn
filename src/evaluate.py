@@ -15,6 +15,8 @@ Also writes outputs/metrics.json — read by both the Next.js dashboard
 and the executive deck.
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import json

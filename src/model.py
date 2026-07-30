@@ -29,6 +29,8 @@ Outputs:
     outputs/models/preprocessing.pkl   (imputer, scaler, feature column order)
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import sys

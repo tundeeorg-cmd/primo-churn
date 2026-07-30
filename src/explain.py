@@ -17,6 +17,8 @@ plots use the (exact, background-free) log-odds SHAP values instead,
 since that's the standard convention for those chart types.
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import sys

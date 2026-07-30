@@ -13,6 +13,8 @@ Output:
     outputs/primo_churn_deck.pptx
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import json

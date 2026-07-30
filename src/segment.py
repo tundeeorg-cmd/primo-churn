@@ -13,6 +13,8 @@ Outputs:
     data/processed/segments.csv   (one row per segment: profile + share)
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 from pathlib import Path

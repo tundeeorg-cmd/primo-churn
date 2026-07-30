@@ -383,6 +383,7 @@ export default async function Home() {
             <p className="text-xs text-white/25">
               {tr("footer.syntheticNote")}
             </p>
+            <p className="text-xs text-white/25 mt-1.5">{tr("footer.author")}</p>
           </div>
         </div>
       </footer>

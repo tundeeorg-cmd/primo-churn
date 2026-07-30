@@ -21,6 +21,10 @@ export const th = {
   "footer.syntheticNote":
     "ตัวเลขประกอบการนำเสนอ · ข้อมูลจำลอง Oberry เป็นเชนร้านกาแฟสมมติที่ใช้สาธิตระบบทำนายการเลิกใช้งานของ PRIMO",
   "footer.sourceOnGithub": "ดูซอร์สโค้ดบน GitHub",
+  // Plain attribution, identical in both locales on purpose — a name and an
+  // affiliation aren't the kind of thing to translate. No email/phone/social
+  // handles here by design (Step 5).
+  "footer.author": "Jenissa Vichiansin — International School Bangkok",
 
   // ── Shared nav / CTA ─────────────────────────────────────────────────
   // Arrow is a separate aria-hidden span at each call site (tundee.org's

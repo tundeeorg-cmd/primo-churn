@@ -19,6 +19,8 @@ Output:
     data/processed/features.csv
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import argparse

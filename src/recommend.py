@@ -24,6 +24,8 @@ Outputs:
                                          an 80%-risk member worth ฿41k.
 """
 
+# Author: Jenissa Vichiansin — International School Bangkok
+
 from __future__ import annotations
 
 import json
