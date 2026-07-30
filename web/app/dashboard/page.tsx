@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-teal">{t(locale, "brand.overline")}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-navy">{t(locale, "brand.overline")}</p>
             <span className="text-xs text-ink-muted">· {t(locale, "dashboard.updatedDaily")}</span>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-semibold text-navy">
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       />
 
       <footer className="mt-10 pt-6 border-t border-line text-xs text-ink-muted">
-        {t(locale, "dashboard.footerNote")}
+        {t(locale, "footer.syntheticNote")}
       </footer>
     </main>
   );

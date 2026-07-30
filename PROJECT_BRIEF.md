@@ -685,10 +685,22 @@ and ship screenshots instead of a live site.
 
 ## Part J — i18n (Thai/English, added post-launch)
 
-`/dashboard` is bilingual, Thai default, English switchable. `/` (the public project page)
-is still English-only — this was a deliberate scoping decision, not an oversight; the
-glossary and effort for this pass only covered the dashboard. Decisions below exist so a
-future session doesn't re-derive or re-litigate them.
+Both `/` (the public project page) and `/dashboard` are bilingual, Thai default, English
+switchable. Decisions below exist so a future session doesn't re-derive or re-litigate them.
+
+**History, because it explains a real bug that shipped once.** The first i18n pass covered
+`/dashboard` only and scoped `/` out deliberately. In practice that produced a live site whose
+*homepage* — the only page a cold visitor lands on — had zero translated strings and no
+switcher anywhere, which read as "the language switcher is missing/broken" even though the
+underlying `LanguageProvider` context was correctly mounted in the root layout the whole time.
+Diagnosed via `git log`/`git diff origin/main`/Vercel deployment inspection before writing any
+code — nothing was actually broken (correct commit, correctly pushed, correctly deployed);
+`/` genuinely had never been wired up. Fixed by translating the full landing page (hero
+narrative, problem section, all 5 pipeline steps, all 4 result captions, the recommends table,
+footer) and mounting `<LanguageSwitcher />` there too. **Lesson for next time:** if a
+`LanguageProvider`/i18n layer is added, wire the switcher AND translations into every
+top-level route in the same pass — a context mounted in the root layout with no consumer on a
+given page is indistinguishable, to a user on that page, from i18n not existing at all.
 
 **Approach — no i18n library.** `next-intl`/`react-i18next` were deliberately skipped for a
 dashboard this size; a dependency-free approach is less likely to break the Vercel build and
@@ -752,3 +764,56 @@ displayed anywhere yet — so this is exercised the moment that changes, not tod
 - `kpi.daysSinceLastActivity` and `action.launchCampaign` are defined in both dictionaries
   (glossary completeness) but have no current UI call site — no component displays recency,
   and there's no real "launch campaign" button yet.
+
+---
+
+## Part K — Visual restyle to match tundee.org
+
+Primo's chrome (backgrounds, headings, buttons, borders, body text) was restyled to match
+tundee.org's real design tokens — read from tundee's own source
+(`~/Desktop/tundee/tailwind.config.ts`, `globals.css`, `Nav.tsx`, `Footer.tsx`,
+`HeroSection.tsx`, `StatsBar.tsx`), never eyeballed from a screenshot.
+
+**The one rule that matters here: chrome colors changed, data-semantic colors did not.**
+`web/app/globals.css`'s `@theme inline` block splits the two explicitly:
+- **Chrome** (`--color-navy`, `--color-navy-dark`, `--color-canvas`, `--color-paper`,
+  `--color-ink`, `--color-ink-muted`, `--color-line`) now match tundee's real hex values
+  (`#1B3A6B` primary navy, `#F5F7FA` background, etc.) — this propagates everywhere
+  automatically via Tailwind v4's CSS-first theming, no per-component edits needed.
+- **Data semantics** (`--color-teal`, `--color-gold`, `--color-coral`, `--color-slate`) —
+  Primo's own original values, **deliberately left unchanged**. `lib/theme.ts`'s
+  `SEGMENT_COLORS` is intentionally identical to `src/segment.py`'s `SEGMENT_COLORS` so a
+  segment reads as the same color in the live dashboard as in the Python-generated deck
+  figures (Part F: "colour carries meaning here, never decoratively") — restyling those to
+  fit tundee would have broken that cross-tier consistency for no visual gain. `SEGMENT_COLORS`
+  is referenced via raw hex in `lib/theme.ts`, not through these CSS variables, so this split
+  cost nothing to implement.
+
+**Borrowed patterns, applied**: stat trio in the hero (tundee's `StatsBar` — divide-x strip,
+big-number-over-small-label), tundee's thin/near-invisible numbered-step treatment (was bold
+teal `text-3xl`, now `0.7rem`/`text-line`), the arrow-as-separate-`aria-hidden`-span pattern
+(was baked into the translated CTA string), tundee's flat-at-rest/lift-on-hover card treatment
+applied to the Results figure cards (`.result-card-hover`), and a rebuilt 3-column dark-navy
+footer (tundee's Brand/Links/Contact structure — Primo has no internal nav, so the middle
+column carries the tech stack instead of site links).
+
+**Outstanding: the four `outputs/figures/` PNGs now clash with the new chrome.** Not fixed —
+explicitly scoped out. All four already use the project's navy/teal/gold/coral/slate
+vocabulary, so this isn't "wrong palette" — Primo's chart-navy is a desaturated, grayish dark
+blue, while the new chrome navy (`#1B3A6B`, matched to tundee) is more saturated. Worst: the
+segment bubble chart (`07_segment_bubble_chart.png`) — the Champions bubble, its single
+largest shape, is navy, sitting directly under the page's now-vivid-navy heading. Second: the
+confusion matrix (`10_confusion_matrix.png`) — one full quadrant ("Caught churn") is the same
+off-navy. Least affected: the tier/redemption bar chart and the decile lift chart, where navy
+is a smaller portion of a chart with enough of its own internal contrast to read fine
+regardless.
+
+To actually fix this: the shared plotting-palette constant (Prompt 3's `navy #1F3B57 · teal
+#2E8B7A · gold #D4A03C · coral #D65C4A · slate #5B7C99`, reused across `src/segment.py`,
+`src/evaluate.py`, and the EDA notebook) would need its navy value changed and all three
+regenerated. **The real tradeoff, not just the mechanical work**: doing that would need to
+happen in lockstep with updating `lib/theme.ts`'s `SEGMENT_COLORS` to match — otherwise the
+figures and the *live dashboard* diverge from each other instead of (as now) diverging from
+the site chrome, trading one inconsistency for a different one. `outputs/primo_churn_deck.pptx`
+(Prompt 14) uses the same palette too, so a real fix touches three artifacts, not one file.
+A Python-tier task, deliberately not attempted in this web-only pass.

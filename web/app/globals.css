@@ -1,23 +1,41 @@
 @import "tailwindcss";
 
 /*
- * PRIMO Churn Radar palette (PROJECT_BRIEF.md Prompt 11).
- * Colour carries meaning: gold = risk emphasis, coral = highest alarm.
- * Neither is ever used decoratively.
+ * PRIMO Churn Radar palette (PROJECT_BRIEF.md Prompt 11 + Part K restyle).
+ *
+ * Two DIFFERENT kinds of color live here — don't conflate them:
+ *
+ * 1. CHROME (navy/navy-dark/canvas/paper/ink/ink-muted/line) — general site
+ *    styling: backgrounds, headings, buttons, borders, body text. These are
+ *    the values matched to tundee.org's real tokens below (Part B0).
+ *
+ * 2. DATA SEMANTICS (teal/gold/coral/slate) — segment and risk-level colors.
+ *    These are Primo's own values, UNCHANGED and NOT matched to tundee,
+ *    because lib/theme.ts's SEGMENT_COLORS is deliberately identical to
+ *    src/segment.py's SEGMENT_COLORS so a segment reads as the same color
+ *    in the live dashboard as in the Python-generated deck figures. Gold =
+ *    risk emphasis, coral = highest alarm — restyling these to fit a new
+ *    palette would break that cross-tier consistency for no visual gain,
+ *    since SEGMENT_COLORS is referenced via raw hex in lib/theme.ts, not
+ *    through these CSS variables anyway.
  */
 @theme inline {
-  --color-navy: #1f3b57;
-  --color-navy-dark: #14293d;
+  /* ── Chrome — matched to tundee.org's real tailwind.config.ts/globals.css
+     values (Part B0), NOT eyeballed. */
+  --color-navy: #1b3a6b; /* tundee navy-600 (primary) — was #1f3b57 */
+  --color-navy-dark: #0a2342; /* tundee navy-900 — was #14293d */
+
+  /* ── Data semantics — unchanged, see note above */
   --color-teal: #2e8b7a;
   --color-gold: #d4a03c;
   --color-coral: #d65c4a;
   --color-slate: #5b7c99;
 
-  --color-canvas: #f7f5f0;
-  --color-paper: #ffffff;
-  --color-ink: #1c2b36;
-  --color-ink-muted: #5b6773;
-  --color-line: #e4e1d8;
+  --color-canvas: #f5f7fa; /* tundee --color-bg — was #f7f5f0 (warm cream) */
+  --color-paper: #ffffff; /* already matched tundee's --color-card */
+  --color-ink: #0a2342; /* tundee --color-text-primary — was #1c2b36 */
+  --color-ink-muted: #6e7a8a; /* tundee --color-text-secondary — was #5b6773 */
+  --color-line: #e8ecf2; /* tundee --color-border — was #e4e1d8 (warm beige) */
 
   /* These theme tokens read from --font-display/--font-body/--font-tabular
      (set below, NOT the -base variables next/font assigns directly) so
@@ -67,4 +85,15 @@ body {
 .tabular-figures {
   font-family: var(--font-tabular), ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* Flat-at-rest, lift-on-hover — tundee.org's exact card-hover treatment
+   (.scholarship-card-hover), applied to the Results figure cards (Part B1:
+   "tundee's card grid → Primo's results/figures section"). */
+.result-card-hover {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.result-card-hover:hover {
+  box-shadow: 0 4px 20px rgba(10, 35, 66, 0.1);
+  transform: translateY(-1px);
 }
