@@ -34,9 +34,9 @@ import joblib
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from explain import make_member_explainer  # noqa: E402
-from features import build_features  # noqa: E402
-from model import NUMERIC_FEATURES, TEST_CUTOFF, _prepare_xy  # noqa: E402
+from explain import make_member_explainer
+from features import build_features
+from model import NUMERIC_FEATURES, TEST_CUTOFF, _prepare_xy
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
@@ -83,7 +83,9 @@ def trailing_12mo_spend(cutoff_ts: pd.Timestamp) -> pd.Series:
     member with more than a year of tenure."""
     txns = pd.read_csv(RAW / "transactions.csv", parse_dates=["transaction_date"])
     window_start = cutoff_ts - pd.Timedelta(days=TRAILING_WINDOW_DAYS)
-    trailing = txns[(txns["transaction_date"] > window_start) & (txns["transaction_date"] <= cutoff_ts)]
+    trailing = txns[
+        (txns["transaction_date"] > window_start) & (txns["transaction_date"] <= cutoff_ts)
+    ]
     return trailing.groupby("member_id")["amount_thb"].sum()
 
 
@@ -127,20 +129,31 @@ def main() -> None:
 
     # ── actions.csv (Part E) ─────────────────────────────────────────────
     actions_df = pd.DataFrame(
-        [{"segment": seg, "typical_risk": v["typical_risk"], "action": v["action"]}
-         for seg, v in SEGMENT_ACTIONS.items()]
+        [
+            {"segment": seg, "typical_risk": v["typical_risk"], "action": v["action"]}
+            for seg, v in SEGMENT_ACTIONS.items()
+        ]
     )
     actions_df.to_csv(PROCESSED / "actions.csv", index=False)
 
     # ── members_scored.csv — full population, feeds Part E `members` ─────
-    scored_cols = ["member_id", "tier", "segment", "churn_probability", "annual_value_thb", *NUMERIC_FEATURES]
+    scored_cols = [
+        "member_id",
+        "tier",
+        "segment",
+        "churn_probability",
+        "annual_value_thb",
+        *NUMERIC_FEATURES,
+    ]
     members_scored = test_df[scored_cols].copy()
     members_scored.to_csv(PROCESSED / "members_scored.csv", index=False)
 
     # ── Flag, explain, recommend ─────────────────────────────────────────
     flagged = test_df[test_df["churn_probability"] >= threshold].copy()
-    print(f"Flagged {len(flagged):,} / {len(test_df):,} members "
-          f"({len(flagged) / len(test_df):.1%}) at threshold {threshold:.4f}")
+    print(
+        f"Flagged {len(flagged):,} / {len(test_df):,} members "
+        f"({len(flagged) / len(test_df):.1%}) at threshold {threshold:.4f}"
+    )
 
     reasons = flagged["member_id"].apply(lambda mid: explain_member(mid, top_n=3))
     flagged["reason_1"] = reasons.apply(lambda r: r[0] if len(r) > 0 else "")
@@ -156,8 +169,15 @@ def main() -> None:
     flagged["recommended_action"] = flagged["segment"].map(lambda s: SEGMENT_ACTIONS[s]["action"])
 
     out_cols = [
-        "member_id", "tier", "segment", "churn_probability",
-        "reason_1", "reason_2", "reason_3", "recommended_action", "annual_value_thb",
+        "member_id",
+        "tier",
+        "segment",
+        "churn_probability",
+        "reason_1",
+        "reason_2",
+        "reason_3",
+        "recommended_action",
+        "annual_value_thb",
     ]
     at_risk = flagged[out_cols].sort_values("annual_value_thb", ascending=False)
     at_risk.to_csv(PROCESSED / "at_risk_members.csv", index=False)
@@ -165,11 +185,19 @@ def main() -> None:
     print(f"\nSaved: {PROCESSED / 'actions.csv'} ({len(actions_df)} rows)")
     print(f"Saved: {PROCESSED / 'members_scored.csv'} ({len(members_scored):,} rows)")
     print(f"Saved: {PROCESSED / 'at_risk_members.csv'} ({len(at_risk):,} rows)")
-    print(f"\nTotal annual value protected (flagged members): ฿{at_risk['annual_value_thb'].sum():,.0f}")
+    print(
+        f"\nTotal annual value protected (flagged members): ฿{at_risk['annual_value_thb'].sum():,.0f}"
+    )
     print("\nBy segment:")
-    print(at_risk.groupby("segment").agg(
-        n=("member_id", "size"), annual_value_thb=("annual_value_thb", "sum"),
-    ).sort_values("annual_value_thb", ascending=False).to_string())
+    print(
+        at_risk.groupby("segment")
+        .agg(
+            n=("member_id", "size"),
+            annual_value_thb=("annual_value_thb", "sum"),
+        )
+        .sort_values("annual_value_thb", ascending=False)
+        .to_string()
+    )
     print("\nTop 5 by annual value at risk:")
     print(at_risk.head(5).to_string(index=False))
 

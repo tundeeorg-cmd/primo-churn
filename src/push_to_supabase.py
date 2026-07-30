@@ -21,11 +21,11 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
+
 from supabase import Client, create_client
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -61,7 +61,9 @@ def _require_env() -> tuple[str, str]:
     load_dotenv(ROOT / ".env")
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_KEY")
-    missing = [name for name, val in [("SUPABASE_URL", url), ("SUPABASE_SERVICE_KEY", key)] if not val]
+    missing = [
+        name for name, val in [("SUPABASE_URL", url), ("SUPABASE_SERVICE_KEY", key)] if not val
+    ]
     if missing:
         raise SystemExit(
             f"Missing required env var(s): {', '.join(missing)}. "
@@ -76,8 +78,9 @@ def _require_files() -> None:
     missing = [str(p) for p in required if not p.exists()]
     if missing:
         raise SystemExit(
-            "Missing required input file(s):\n  " + "\n  ".join(missing) +
-            "\nRun `make all` (or the individual src/ scripts in order) first. Nothing was written."
+            "Missing required input file(s):\n  "
+            + "\n  ".join(missing)
+            + "\nRun `make all` (or the individual src/ scripts in order) first. Nothing was written."
         )
 
 
@@ -114,7 +117,9 @@ def _records(csv_name: str) -> list[dict]:
     return json.loads(df.to_json(orient="records"))
 
 
-def _delete_all(client: Client, table: str, pk_col: str, sentinel: str | int = NEVER_MATCHES) -> None:
+def _delete_all(
+    client: Client, table: str, pk_col: str, sentinel: str | int = NEVER_MATCHES
+) -> None:
     client.table(table).delete().neq(pk_col, sentinel).execute()
 
 
@@ -142,8 +147,7 @@ def main() -> None:
     _require_files()
     client = create_client(url, key)
 
-    print("Pushing to Supabase — truncate + re-insert, batched at "
-          f"{BATCH_SIZE} rows.\n")
+    print("Pushing to Supabase — truncate + re-insert, batched at " f"{BATCH_SIZE} rows.\n")
 
     records_by_table = {table: _records(csv) for table, (csv, _) in TEXT_PK_TABLES.items()}
     metrics_row = _load_metrics_row()

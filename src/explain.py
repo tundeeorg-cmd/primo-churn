@@ -20,8 +20,8 @@ since that's the standard convention for those chart types.
 from __future__ import annotations
 
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import joblib
 import matplotlib.pyplot as plt
@@ -31,8 +31,8 @@ import shap
 from matplotlib.colors import LinearSegmentedColormap
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from features import build_features  # noqa: E402
-from model import TEST_CUTOFF, _prepare_xy  # noqa: E402
+from features import build_features
+from model import TEST_CUTOFF, _prepare_xy
 
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "outputs" / "models"
@@ -40,12 +40,20 @@ FIG_DIR = ROOT / "outputs" / "figures"
 
 NAVY, TEAL, GOLD, CORAL, SLATE = "#1F3B57", "#2E8B7A", "#D4A03C", "#D65C4A", "#5B7C99"
 
-plt.rcParams.update({
-    "figure.dpi": 150, "savefig.dpi": 150, "font.size": 11,
-    "axes.spines.top": False, "axes.spines.right": False,
-    "axes.grid": True, "grid.alpha": 0.25, "grid.linewidth": 0.5,
-    "figure.facecolor": "white", "axes.facecolor": "white",
-})
+plt.rcParams.update(
+    {
+        "figure.dpi": 150,
+        "savefig.dpi": 150,
+        "font.size": 11,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": True,
+        "grid.alpha": 0.25,
+        "grid.linewidth": 0.5,
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+    }
+)
 
 
 def _pct(x: float) -> str:
@@ -63,10 +71,12 @@ FEATURE_PHRASING: dict[str, Callable[[float], str]] = {
         # you used to. Switch to a multiple once the gap has more than
         # doubled instead of letting the percentage run away.
         f"typical gap between visits is now {v:.1f}x longer than their own usual pattern"
-        if v >= 2.0 else
-        f"visiting {(v - 1) * 100:.0f}% less often than their own usual pattern"
-        if v >= 1 else
-        f"visiting {(1 - v) * 100:.0f}% more often than their own usual pattern"
+        if v >= 2.0
+        else (
+            f"visiting {(v - 1) * 100:.0f}% less often than their own usual pattern"
+            if v >= 1
+            else f"visiting {(1 - v) * 100:.0f}% more often than their own usual pattern"
+        )
     ),
     "tenure_days": lambda v: f"a member for {v:.0f} days",
     "frequency": lambda v: f"{v:.0f} visits on record",
@@ -74,8 +84,8 @@ FEATURE_PHRASING: dict[str, Callable[[float], str]] = {
     "distinct_branches": lambda v: f"visited {v:.0f} different branches",
     "home_branch_share": lambda v: (
         f"only {_pct(v)} of visits at their home branch — spreading across locations"
-        if v < 0.5 else
-        f"{_pct(v)} of visits at their home branch — consistently loyal to one location"
+        if v < 0.5
+        else f"{_pct(v)} of visits at their home branch — consistently loyal to one location"
     ),
     "redemption_count": lambda v: (
         "never redeemed a point" if v == 0 else f"redeemed points {v:.0f} times"
@@ -86,8 +96,8 @@ FEATURE_PHRASING: dict[str, Callable[[float], str]] = {
     "avg_days_between_visits": lambda v: f"visits roughly every {v:.0f} days",
     "visits_last_30d_vs_prev_30d": lambda v: (
         f"visits down {(1 - v) * 100:.0f}% in the last 30 days vs. the 30 before"
-        if v < 1 else
-        f"visits up {(v - 1) * 100:.0f}% in the last 30 days vs. the 30 before"
+        if v < 1
+        else f"visits up {(v - 1) * 100:.0f}% in the last 30 days vs. the 30 before"
     ),
     "tier_Bronze": lambda v: "Bronze-tier member",
     "tier_Silver": lambda v: "Silver-tier member",
@@ -103,7 +113,10 @@ def phrase(feature: str, value: float) -> str:
 
 
 def make_member_explainer(
-    test_df: pd.DataFrame, X: pd.DataFrame, feature_cols: list[str], xgb_model,
+    test_df: pd.DataFrame,
+    X: pd.DataFrame,
+    feature_cols: list[str],
+    xgb_model,
 ) -> Callable[..., list[str]]:
     """Build the probability-space SHAP explainer once and return a reusable
     explain_member(member_id, top_n=3) -> list[str] closure over it.
@@ -118,7 +131,10 @@ def make_member_explainer(
     """
     background = X.sample(n=min(200, len(X)), random_state=42)
     prob_explainer = shap.TreeExplainer(
-        xgb_model, data=background, feature_perturbation="interventional", model_output="probability"
+        xgb_model,
+        data=background,
+        feature_perturbation="interventional",
+        model_output="probability",
     )
 
     def explain_member(member_id: str, top_n: int = 3) -> list[str]:

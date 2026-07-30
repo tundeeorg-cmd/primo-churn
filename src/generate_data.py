@@ -61,9 +61,9 @@ BEHAVIOR_TYPES = ["champion", "loyal", "casual"]
 BEHAVIOR_WEIGHTS = [0.03, 0.27, 0.70]  # kept small — at true 3-5x/week even a
 # modest champion share would blow past ~300k transactions over a 2-year window
 BEHAVIOR_GAP_DAYS = {
-    "champion": (1.4, 2.3),   # 3-5x / week
-    "loyal": (5.5, 8.5),      # ~1x / week
-    "casual": (14.0, 32.0),   # 1-2x / month
+    "champion": (1.4, 2.3),  # 3-5x / week
+    "loyal": (5.5, 8.5),  # ~1x / week
+    "casual": (14.0, 32.0),  # 1-2x / month
 }
 
 WIN_BACK_PROB = 0.35  # chance a fully-decayed member gets one surprise
@@ -182,16 +182,18 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
             redeemed = int(rng.integers(50, min(300, points_balance) + 1))
             points_balance -= redeemed
         category = ITEM_CATEGORIES[rng.choice(len(ITEM_CATEGORIES), p=ITEM_CATEGORY_WEIGHTS)]
-        visits.append({
-            "transaction_id": f"T{member_idx:06d}{txn_seq:03d}",
-            "member_id": member_id,
-            "transaction_date": dt.isoformat(sep=" "),
-            "branch_id": branch,
-            "amount_thb": amount,
-            "points_earned": earned,
-            "points_redeemed": redeemed,
-            "item_category": category,
-        })
+        visits.append(
+            {
+                "transaction_id": f"T{member_idx:06d}{txn_seq:03d}",
+                "member_id": member_id,
+                "transaction_date": dt.isoformat(sep=" "),
+                "branch_id": branch,
+                "amount_thb": amount,
+                "points_earned": earned,
+                "points_redeemed": redeemed,
+                "item_category": category,
+            }
+        )
 
     # First visit — signup and first purchase coincide (point-of-sale enrollment).
     record_visit(signup_date, in_decay=False, shrink_mult=1.0)
@@ -200,7 +202,12 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
     # Second visit, using the onboarding-effect first_gap.
     next_offset = current_offset + first_gap
     if next_offset > WINDOW_DAYS:
-        return _member_row(member_id, signup_date, tier, home_branch, age_band, city=BRANCH_CITY[home_branch]), visits
+        return (
+            _member_row(
+                member_id, signup_date, tier, home_branch, age_band, city=BRANCH_CITY[home_branch]
+            ),
+            visits,
+        )
     current_offset = next_offset
     record_visit(WINDOW_START + timedelta(days=current_offset), in_decay=False, shrink_mult=1.0)
 
@@ -216,7 +223,7 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
             # basket further — guaranteed to happen over `decay_steps_total`
             # actual visits, regardless of how fast or slow this member's
             # normal cadence is.
-            widen = 1.0 + 2.0 * (decay_step / decay_steps_total)      # up to ~3.0x by the last step
+            widen = 1.0 + 2.0 * (decay_step / decay_steps_total)  # up to ~3.0x by the last step
             shrink_mult = 1.0 - 0.20 * (decay_step / decay_steps_total)  # up to ~20% smaller basket
             gap = base_gap * widen * season_mult * rng.uniform(0.85, 1.15)
         else:
@@ -232,7 +239,11 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
             break  # censored at window end (mid-decay or not)
 
         current_offset = next_offset
-        record_visit(WINDOW_START + timedelta(days=current_offset), in_decay=in_decay, shrink_mult=shrink_mult)
+        record_visit(
+            WINDOW_START + timedelta(days=current_offset),
+            in_decay=in_decay,
+            shrink_mult=shrink_mult,
+        )
 
         if in_decay:
             decay_step += 1
@@ -249,11 +260,14 @@ def simulate_member(member_idx: int) -> tuple[dict, list[dict]]:
                     if winback_offset <= WINDOW_DAYS:
                         record_visit(
                             WINDOW_START + timedelta(days=winback_offset),
-                            in_decay=False, shrink_mult=1.0,
+                            in_decay=False,
+                            shrink_mult=1.0,
                         )
                 break  # decay (and any win-back) complete — silent for the rest of the window
 
-    member_row = _member_row(member_id, signup_date, tier, home_branch, age_band, city=BRANCH_CITY[home_branch])
+    member_row = _member_row(
+        member_id, signup_date, tier, home_branch, age_band, city=BRANCH_CITY[home_branch]
+    )
     return member_row, visits
 
 
@@ -322,7 +336,9 @@ def _print_validation_summary(members_df: pd.DataFrame, txn_df: pd.DataFrame) ->
     print("=" * 60)
     print(f"Members:               {len(members_df):,}")
     print(f"Transactions:          {len(txn_df):,}")
-    print(f"Date range:            {txn_df['transaction_date'].min()} -> {txn_df['transaction_date'].max()}")
+    print(
+        f"Date range:            {txn_df['transaction_date'].min()} -> {txn_df['transaction_date'].max()}"
+    )
     print(f"Churn rate (60d rule): {churn_rate:.1%}  (target 22-28%)")
     print()
     print("Tier distribution:")

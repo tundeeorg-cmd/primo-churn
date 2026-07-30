@@ -16,3 +16,17 @@ dependencies = [
     "supabase>=2.31.0",
     "xgboost>=3.3.0",
 ]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# E402 (module-level import not at top) is deliberately enabled: src/*.py
+# scripts that import sibling modules use sys.path.insert(0, ...) followed
+# by a non-top-of-file import with an explicit `# noqa: E402` — enabling
+# the rule here is what makes those noqa comments meaningful instead of
+# dead annotations.
+extend-select = ["E402"]

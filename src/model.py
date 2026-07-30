@@ -44,15 +44,19 @@ from sklearn.dummy import DummyClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    accuracy_score, average_precision_score, f1_score,
-    precision_score, recall_score, roc_auc_score,
+    accuracy_score,
+    average_precision_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
 )
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from features import build_features  # noqa: E402
+from features import build_features
 
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "outputs" / "models"
@@ -62,15 +66,26 @@ TRAIN_CUTOFF = date(2026, 1, 31)
 TEST_CUTOFF = date(2026, 4, 30)
 
 NUMERIC_FEATURES = [
-    "recency_days", "frequency", "monetary", "tenure_days",
-    "distinct_branches", "home_branch_share", "redemption_count", "points_balance",
-    "morning_visit_ratio", "weekend_visit_ratio", "avg_days_between_visits",
-    "gap_trend", "visits_last_30d_vs_prev_30d",
+    "recency_days",
+    "frequency",
+    "monetary",
+    "tenure_days",
+    "distinct_branches",
+    "home_branch_share",
+    "redemption_count",
+    "points_balance",
+    "morning_visit_ratio",
+    "weekend_visit_ratio",
+    "avg_days_between_visits",
+    "gap_trend",
+    "visits_last_30d_vs_prev_30d",
 ]
 CATEGORICAL_FEATURES = ["tier"]  # Part D: Gold churns less — worth giving the model directly
 
 
-def _prepare_xy(df: pd.DataFrame, dummy_columns: list[str] | None = None) -> tuple[pd.DataFrame, pd.Series, list[str]]:
+def _prepare_xy(
+    df: pd.DataFrame, dummy_columns: list[str] | None = None
+) -> tuple[pd.DataFrame, pd.Series, list[str]]:
     """Numeric features + one-hot tier. `dummy_columns` (from train) keeps
     train/test aligned even if a tier category is missing from one split."""
     X = df[NUMERIC_FEATURES].copy()
@@ -155,9 +170,13 @@ def main() -> None:
         # interventional TreeExplainer (needed for explain.py) refuses outright
     )
     search = RandomizedSearchCV(
-        xgb_base, param_dist, n_iter=20, scoring="roc_auc",
+        xgb_base,
+        param_dist,
+        n_iter=20,
+        scoring="roc_auc",
         cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE),
-        random_state=RANDOM_STATE, n_jobs=-1,
+        random_state=RANDOM_STATE,
+        n_jobs=-1,
     )
     search.fit(X_train, y_train)
     xgb_model = search.best_estimator_

@@ -71,6 +71,7 @@ def load_numbers() -> dict:
 
 # ── Low-level helpers ────────────────────────────────────────────────────────
 
+
 def add_blank_slide(prs: Presentation, bg: RGBColor):
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # 6 = blank layout
     fill = slide.background.fill
@@ -80,8 +81,20 @@ def add_blank_slide(prs: Presentation, bg: RGBColor):
 
 
 def add_text(
-    slide, left, top, width, height, text, *, size, color, bold=False,
-    font=BODY_FONT, align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP, line_spacing=1.15,
+    slide,
+    left,
+    top,
+    width,
+    height,
+    text,
+    *,
+    size,
+    color,
+    bold=False,
+    font=BODY_FONT,
+    align=PP_ALIGN.LEFT,
+    anchor=MSO_ANCHOR.TOP,
+    line_spacing=1.15,
 ):
     box = slide.shapes.add_textbox(left, top, width, height)
     tf = box.text_frame
@@ -101,8 +114,19 @@ def add_text(
 
 
 def add_bullets(
-    slide, left, top, width, height, items, *, size, color, font=BODY_FONT,
-    bold_lead=False, space_after=10, bullet_color=None,
+    slide,
+    left,
+    top,
+    width,
+    height,
+    items,
+    *,
+    size,
+    color,
+    font=BODY_FONT,
+    bold_lead=False,
+    space_after=10,
+    bullet_color=None,
 ):
     box = slide.shapes.add_textbox(left, top, width, height)
     tf = box.text_frame
@@ -129,16 +153,29 @@ def add_bullets(
 
 def add_title(slide, text, *, color=NAVY, size=32):
     return add_text(
-        slide, MARGIN, Inches(0.55), SW - 2 * MARGIN, Inches(1.1),
-        text, size=size, color=color, bold=True, font=HEADER_FONT,
+        slide,
+        MARGIN,
+        Inches(0.55),
+        SW - 2 * MARGIN,
+        Inches(1.1),
+        text,
+        size=size,
+        color=color,
+        bold=True,
+        font=HEADER_FONT,
     )
 
 
 def add_footer(slide, *, dark=False):
     add_text(
-        slide, MARGIN, SH - Inches(0.5), Inches(6), Inches(0.35),
+        slide,
+        MARGIN,
+        SH - Inches(0.5),
+        Inches(6),
+        Inches(0.35),
         "Illustrative figures · synthetic data",
-        size=10, color=(SLATE if not dark else RGBColor(0x9A, 0xAD, 0xC2)),
+        size=10,
+        color=(SLATE if not dark else RGBColor(0x9A, 0xAD, 0xC2)),
         font=BODY_FONT,
     )
 
@@ -164,8 +201,6 @@ def add_picture_fit(slide, path: Path, left, top, max_w, max_h):
 
 
 def add_numbered_circle(slide, cx, cy, diameter, number, *, fill=NAVY, text_color=WHITE):
-    from pptx.enum.shapes import MSO_SHAPE
-
     shape = slide.shapes.add_shape(
         MSO_SHAPE.OVAL, cx - Emu(int(diameter / 2)), cy - Emu(int(diameter / 2)), diameter, diameter
     )
@@ -192,59 +227,112 @@ def set_notes(slide, text: str):
 
 def add_stat(slide, left, top, width, value, label, *, value_color=NAVY, value_size=44):
     add_text(
-        slide, left, top, width, Inches(0.9), value,
-        size=value_size, color=value_color, bold=True, font=HEADER_FONT,
+        slide,
+        left,
+        top,
+        width,
+        Inches(0.9),
+        value,
+        size=value_size,
+        color=value_color,
+        bold=True,
+        font=HEADER_FONT,
     )
     add_text(
-        slide, left, top + Inches(0.85), width, Inches(0.5), label,
-        size=13, color=INK_MUTED, font=BODY_FONT,
+        slide,
+        left,
+        top + Inches(0.85),
+        width,
+        Inches(0.5),
+        label,
+        size=13,
+        color=INK_MUTED,
+        font=BODY_FONT,
     )
 
 
 # ── Slide builders ───────────────────────────────────────────────────────────
 
+
 def build_slide_1(prs, n):
     m = n["metrics"]
     s = add_blank_slide(prs, NAVY_DARK)
     add_text(
-        s, MARGIN, Inches(0.7), Inches(4), Inches(0.4), "PRIMO CHURN RADAR",
-        size=13, color=TEAL, bold=True, font=BODY_FONT,
+        s,
+        MARGIN,
+        Inches(0.7),
+        Inches(4),
+        Inches(0.4),
+        "PRIMO CHURN RADAR",
+        size=13,
+        color=TEAL,
+        bold=True,
+        font=BODY_FONT,
     )
     add_text(
-        s, MARGIN, Inches(1.25), Inches(11.5), Inches(1.6),
+        s,
+        MARGIN,
+        Inches(1.25),
+        Inches(11.5),
+        Inches(1.6),
         "Oberry is losing members quietly.",
-        size=40, color=WHITE, bold=True, font=HEADER_FONT,
+        size=40,
+        color=WHITE,
+        bold=True,
+        font=HEADER_FONT,
     )
     churn_pct = round(m["test_churn_rate"] * 100)
     add_stat(
-        s, MARGIN, Inches(3.2), Inches(3.6),
-        f"~{churn_pct}%", "of members go silent for 60+ days, unnoticed",
+        s,
+        MARGIN,
+        Inches(3.2),
+        Inches(3.6),
+        f"~{churn_pct}%",
+        "of members go silent for 60+ days, unnoticed",
         value_color=CORAL,
     )
     add_stat(
-        s, Inches(4.6), Inches(3.2), Inches(3.6),
-        f"{n['n_flagged']:,}", "members already flagged high-risk today",
+        s,
+        Inches(4.6),
+        Inches(3.2),
+        Inches(3.6),
+        f"{n['n_flagged']:,}",
+        "members already flagged high-risk today",
         value_color=GOLD,
     )
     add_stat(
-        s, Inches(8.6), Inches(3.2), Inches(4),
-        f"฿{n['flagged_value_thb']/1_000_000:.1f}M/yr", "in spend riding on reaching them in time",
+        s,
+        Inches(8.6),
+        Inches(3.2),
+        Inches(4),
+        f"฿{n['flagged_value_thb']/1_000_000:.1f}M/yr",
+        "in spend riding on reaching them in time",
         value_color=WHITE,
     )
     add_text(
-        s, MARGIN, Inches(5.6), Inches(10.5), Inches(1.0),
+        s,
+        MARGIN,
+        Inches(5.6),
+        Inches(10.5),
+        Inches(1.0),
         "No cancellation, no complaint — a member just stops coming back, and nothing in a "
         "typical POS report flags it until they're already gone.",
-        size=15, color=RGBColor(0xC9, 0xD4, 0xDE), font=BODY_FONT, line_spacing=1.3,
+        size=15,
+        color=RGBColor(0xC9, 0xD4, 0xDE),
+        font=BODY_FONT,
+        line_spacing=1.3,
     )
     add_footer(s, dark=True)
-    set_notes(s, (
-        "Open with the number, not the model. Almost one in five Oberry members go quiet for "
-        "two straight months before anyone notices — that's the definition of churn we used "
-        "throughout. Right now, 2,260 members are already flagged as high-risk by the system, "
-        "and between them they represent about 5.4 million baht a year in spend. This talk is "
-        "about how we found them in time to do something about it."
-    ))
+    set_notes(
+        s,
+        (
+            "Open with the number, not the model. Almost one in five Oberry members go quiet for "
+            "two straight months before anyone notices — that's the definition of churn we used "
+            "throughout. Right now, 2,260 members are already flagged as high-risk by the system, "
+            "and between them they represent about 5.4 million baht a year in spend. This talk is "
+            "about how we found them in time to do something about it."
+        ),
+    )
 
 
 def build_slide_2(prs, n):
@@ -258,8 +346,17 @@ def build_slide_2(prs, n):
         cy = Inches(2.0)
         add_numbered_circle(s, cx, cy, Inches(0.7), i + 1, fill=[NAVY, TEAL, GOLD, CORAL][i])
         add_text(
-            s, cx - Inches(1.0), cy + Inches(0.55), Inches(2.0), Inches(0.4), label,
-            size=14, color=INK, bold=True, font=BODY_FONT, align=PP_ALIGN.CENTER,
+            s,
+            cx - Inches(1.0),
+            cy + Inches(0.55),
+            Inches(2.0),
+            Inches(0.4),
+            label,
+            size=14,
+            color=INK,
+            bold=True,
+            font=BODY_FONT,
+            align=PP_ALIGN.CENTER,
         )
         if i < len(stages) - 1:
             line = s.shapes.add_connector(
@@ -268,55 +365,89 @@ def build_slide_2(prs, n):
             line.line.color.rgb = LINE
             line.line.width = Pt(2)
     add_text(
-        s, MARGIN, Inches(3.1), Inches(11.5), Inches(0.8),
+        s,
+        MARGIN,
+        Inches(3.1),
+        Inches(11.5),
+        Inches(0.8),
         "Two years of transaction history becomes five member segments, a trained risk score "
         "for every member, and a specific recommended action — not a hunch.",
-        size=15, color=INK, font=BODY_FONT, line_spacing=1.3,
+        size=15,
+        color=INK,
+        font=BODY_FONT,
+        line_spacing=1.3,
     )
     add_picture_fit(
-        s, FIG / "dashboard_screenshot.png",
-        MARGIN, Inches(3.95), Inches(12.1), Inches(3.05),
+        s,
+        FIG / "dashboard_screenshot.png",
+        MARGIN,
+        Inches(3.95),
+        Inches(12.1),
+        Inches(3.05),
     )
     add_footer(s)
-    set_notes(s, (
-        "This is the whole system in one line, and this screenshot is the actual live "
-        "dashboard, not a mockup — the Oberry Member Retention Radar. Every number on it reads "
-        "straight from the same database this pipeline writes to. The operator sees who's "
-        "flagged, why, and what to do about it, sorted by how much value is on the line."
-    ))
+    set_notes(
+        s,
+        (
+            "This is the whole system in one line, and this screenshot is the actual live "
+            "dashboard, not a mockup — the Oberry Member Retention Radar. Every number on it reads "
+            "straight from the same database this pipeline writes to. The operator sees who's "
+            "flagged, why, and what to do about it, sorted by how much value is on the line."
+        ),
+    )
 
 
 def build_slide_3(prs, n):
     s = add_blank_slide(prs, WHITE)
     add_title(s, "Five kinds of member, not one undifferentiated list")
-    add_picture_fit(s, FIG / "07_segment_bubble_chart.png", MARGIN, Inches(1.7), Inches(7.6), Inches(5.3))
+    add_picture_fit(
+        s, FIG / "07_segment_bubble_chart.png", MARGIN, Inches(1.7), Inches(7.6), Inches(5.3)
+    )
 
     seg_order = ["Champions", "Loyal", "At-risk regulars", "Hibernating", "One-and-done"]
-    colors = {"Champions": NAVY, "Loyal": TEAL, "At-risk regulars": GOLD, "Hibernating": CORAL, "One-and-done": SLATE}
+    colors = {
+        "Champions": NAVY,
+        "Loyal": TEAL,
+        "At-risk regulars": GOLD,
+        "Hibernating": CORAL,
+        "One-and-done": SLATE,
+    }
     by_name = n["segments"].set_index("segment")
     y = Inches(1.9)
     for name in seg_order:
         row = by_name.loc[name]
-        dot = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(8.6), y + Inches(0.08), Inches(0.22), Inches(0.22))
+        dot = s.shapes.add_shape(
+            MSO_SHAPE.OVAL, Inches(8.6), y + Inches(0.08), Inches(0.22), Inches(0.22)
+        )
         dot.fill.solid()
         dot.fill.fore_color.rgb = colors[name]
         dot.line.fill.background()
         dot.shadow.inherit = False
         add_text(
-            s, Inches(9.0), y, Inches(3.7), Inches(0.5),
+            s,
+            Inches(9.0),
+            y,
+            Inches(3.7),
+            Inches(0.5),
             f"{name} — {round(row['share']*100)}%",
-            size=15, color=INK, bold=True, font=BODY_FONT,
+            size=15,
+            color=INK,
+            bold=True,
+            font=BODY_FONT,
         )
         y += Inches(0.95)
     add_footer(s)
-    set_notes(s, (
-        "This split wasn't hand-picked — it's k-means clustering on recency, frequency, and "
-        "spend, and the model chose five groups on its own. Position on the chart is recency "
-        "and visit frequency; bubble size is how much each group spends. Champions are small "
-        "in number but huge in value. At-risk regulars are the biggest group of all, at 32 "
-        "percent — that's the group where a small improvement in retention pays for the whole "
-        "project."
-    ))
+    set_notes(
+        s,
+        (
+            "This split wasn't hand-picked — it's k-means clustering on recency, frequency, and "
+            "spend, and the model chose five groups on its own. Position on the chart is recency "
+            "and visit frequency; bubble size is how much each group spends. Champions are small "
+            "in number but huge in value. At-risk regulars are the biggest group of all, at 32 "
+            "percent — that's the group where a small improvement in retention pays for the whole "
+            "project."
+        ),
+    )
 
 
 def build_slide_4(prs, n):
@@ -324,51 +455,75 @@ def build_slide_4(prs, n):
     s = add_blank_slide(prs, WHITE)
     add_title(s, "Does it work? Yes — with honest, stated limits")
     add_picture_fit(s, FIG / "08_roc_curves.png", MARGIN, Inches(1.6), Inches(5.9), Inches(4.4))
-    add_picture_fit(s, FIG / "10_confusion_matrix.png", Inches(6.9), Inches(1.6), Inches(5.7), Inches(4.4))
+    add_picture_fit(
+        s, FIG / "10_confusion_matrix.png", Inches(6.9), Inches(1.6), Inches(5.7), Inches(4.4)
+    )
     recall_pct = round(m["model_recall"] * 100)
     precision_pct = round(m["chosen_threshold"]["precision"] * 100)
     add_text(
-        s, MARGIN, Inches(6.2), Inches(12.1), Inches(0.9),
+        s,
+        MARGIN,
+        Inches(6.2),
+        Inches(12.1),
+        Inches(0.9),
         f"At the chosen threshold, the model catches {recall_pct}% of members who actually "
         f"leave, at {precision_pct}% precision on every alarm it raises — no model catches "
         "everyone, and this one doesn't pretend to.",
-        size=15, color=INK, font=BODY_FONT, line_spacing=1.3,
+        size=15,
+        color=INK,
+        font=BODY_FONT,
+        line_spacing=1.3,
     )
     add_footer(s)
-    set_notes(s, (
-        "Two models, tested the honest way: trained on an earlier three-month window, tested "
-        "on a later one the model never saw, not a random shuffle that would leak the answer. "
-        "XGBoost beats plain logistic regression, but the logistic regression is respectably "
-        "close — that's a good sign the signal is real, not an artifact of a complex model "
-        "overfitting. The confusion matrix uses plain labels on purpose: caught churn, missed "
-        "churn, false alarm, true stay. We chose the threshold to maximize how many leavers we "
-        "catch, while keeping false alarms low enough that the win-back coupon stays a genuine "
-        "signal instead of spam."
-    ))
+    set_notes(
+        s,
+        (
+            "Two models, tested the honest way: trained on an earlier three-month window, tested "
+            "on a later one the model never saw, not a random shuffle that would leak the answer. "
+            "XGBoost beats plain logistic regression, but the logistic regression is respectably "
+            "close — that's a good sign the signal is real, not an artifact of a complex model "
+            "overfitting. The confusion matrix uses plain labels on purpose: caught churn, missed "
+            "churn, false alarm, true stay. We chose the threshold to maximize how many leavers we "
+            "catch, while keeping false alarms low enough that the win-back coupon stays a genuine "
+            "signal instead of spam."
+        ),
+    )
 
 
 def build_slide_5(prs, n):
     s = add_blank_slide(prs, WHITE)
     add_title(s, "The strongest warning isn't spend — it's silence")
-    add_picture_fit(s, FIG / "12_shap_importance.png", MARGIN, Inches(1.6), Inches(7.0), Inches(5.4))
+    add_picture_fit(
+        s, FIG / "12_shap_importance.png", MARGIN, Inches(1.6), Inches(7.0), Inches(5.4)
+    )
     add_bullets(
-        s, Inches(8.3), Inches(1.9), Inches(4.4), Inches(4.8),
+        s,
+        Inches(8.3),
+        Inches(1.9),
+        Inches(4.4),
+        Inches(4.8),
         [
             "A widening gap between visits predicts departure weeks before the last one.",
             "Members who never redeem a point churn noticeably more often.",
             "Recency and visit-gap trend dominate — spend alone barely registers.",
         ],
-        size=15, color=INK, bullet_color=TEAL, space_after=18,
+        size=15,
+        color=INK,
+        bullet_color=TEAL,
+        space_after=18,
     )
     add_footer(s)
-    set_notes(s, (
-        "This chart ranks features by how much they actually move the model's prediction, "
-        "averaged across every member. The two at the top — recency and gap trend — are "
-        "exactly what the café-specific design of this project was built to catch: not just "
-        "'when did they last visit,' but 'has their rhythm already started to change.' The "
-        "redemption finding is the actionable one for marketing: a member who's never redeemed "
-        "a point never felt the loyalty program actually reward them, and they leave for it."
-    ))
+    set_notes(
+        s,
+        (
+            "This chart ranks features by how much they actually move the model's prediction, "
+            "averaged across every member. The two at the top — recency and gap trend — are "
+            "exactly what the café-specific design of this project was built to catch: not just "
+            "'when did they last visit,' but 'has their rhythm already started to change.' The "
+            "redemption finding is the actionable one for marketing: a member who's never redeemed "
+            "a point never felt the loyalty program actually reward them, and they leave for it."
+        ),
+    )
 
 
 def build_slide_6(prs, n):
@@ -391,12 +546,24 @@ def build_slide_6(prs, n):
     top += Inches(0.45)
     for i, (seg, risk, action, color) in enumerate(rows):
         y = top + row_h * i
-        dot = s.shapes.add_shape(MSO_SHAPE.OVAL, col_x[0], y + Inches(0.1), Inches(0.16), Inches(0.16))
+        dot = s.shapes.add_shape(
+            MSO_SHAPE.OVAL, col_x[0], y + Inches(0.1), Inches(0.16), Inches(0.16)
+        )
         dot.fill.solid()
         dot.fill.fore_color.rgb = color
         dot.line.fill.background()
         dot.shadow.inherit = False
-        add_text(s, col_x[0] + Inches(0.3), y, Inches(2.9), Inches(0.5), seg, size=14, color=INK, bold=True)
+        add_text(
+            s,
+            col_x[0] + Inches(0.3),
+            y,
+            Inches(2.9),
+            Inches(0.5),
+            seg,
+            size=14,
+            color=INK,
+            bold=True,
+        )
         add_text(s, col_x[1], y, Inches(1.1), Inches(0.5), risk, size=13, color=INK_MUTED)
         add_text(s, col_x[2], y, Inches(7.4), Inches(0.5), action, size=13, color=INK)
 
@@ -410,25 +577,41 @@ def build_slide_6(prs, n):
     card.shadow.inherit = False
     tm = n["top_member"]
     add_text(
-        s, Inches(0.9), ex_top + Inches(0.18), Inches(11.4), Inches(0.4),
-        f"Worked example — member {tm['member_id']}", size=14, color=NAVY, bold=True,
+        s,
+        Inches(0.9),
+        ex_top + Inches(0.18),
+        Inches(11.4),
+        Inches(0.4),
+        f"Worked example — member {tm['member_id']}",
+        size=14,
+        color=NAVY,
+        bold=True,
     )
     add_text(
-        s, Inches(0.9), ex_top + Inches(0.62), Inches(11.4), Inches(0.9),
+        s,
+        Inches(0.9),
+        ex_top + Inches(0.62),
+        Inches(11.4),
+        Inches(0.9),
         f"{tm['tier']} tier, {tm['segment']} segment, ฿{tm['annual_value_thb']:,.0f}/year in spend. "
         f"{tm['reason_1'].capitalize()}. "
         f"Risk: {tm['churn_probability']*100:.1f}%. Action: {tm['recommended_action']}.",
-        size=13, color=INK, line_spacing=1.25,
+        size=13,
+        color=INK,
+        line_spacing=1.25,
     )
     add_footer(s)
-    set_notes(s, (
-        "The action table is deliberately not one-size-fits-all: a Champion at risk gets "
-        "recognition, not a discount, because they don't need convincing to spend — they need "
-        "to feel seen. Hibernating members get the biggest incentive because they're the "
-        "hardest and most expensive to win back once fully gone. The example at the bottom is "
-        "a real flagged member from the current run — the highest-value one — with the actual "
-        "reasons the model gave and the exact action it recommends."
-    ))
+    set_notes(
+        s,
+        (
+            "The action table is deliberately not one-size-fits-all: a Champion at risk gets "
+            "recognition, not a discount, because they don't need convincing to spend — they need "
+            "to feel seen. Hibernating members get the biggest incentive because they're the "
+            "hardest and most expensive to win back once fully gone. The example at the bottom is "
+            "a real flagged member from the current run — the highest-value one — with the actual "
+            "reasons the model gave and the exact action it recommends."
+        ),
+    )
 
 
 def build_slide_7(prs, n):
@@ -445,47 +628,86 @@ def build_slide_7(prs, n):
     w = Inches(2.6)
     gap = Inches(0.55)
     for i, (value, label) in enumerate(funnel):
-        add_stat(s, x, Inches(1.8), w, value, label, value_color=[WHITE, TEAL, GOLD, CORAL][i], value_size=34)
+        add_stat(
+            s,
+            x,
+            Inches(1.8),
+            w,
+            value,
+            label,
+            value_color=[WHITE, TEAL, GOLD, CORAL][i],
+            value_size=34,
+        )
         if i < len(funnel) - 1:
             add_text(
-                s, x + w, Inches(1.95), gap, Inches(0.6), "→",
-                size=24, color=RGBColor(0x5A, 0x70, 0x88), align=PP_ALIGN.CENTER,
+                s,
+                x + w,
+                Inches(1.95),
+                gap,
+                Inches(0.6),
+                "→",
+                size=24,
+                color=RGBColor(0x5A, 0x70, 0x88),
+                align=PP_ALIGN.CENTER,
             )
         x += w + gap
 
     add_text(
-        s, MARGIN, Inches(3.55), Inches(4.3), Inches(0.4), "To productionize, this needs:",
-        size=14, color=WHITE, bold=True,
+        s,
+        MARGIN,
+        Inches(3.55),
+        Inches(4.3),
+        Inches(0.4),
+        "To productionize, this needs:",
+        size=14,
+        color=WHITE,
+        bold=True,
     )
     add_bullets(
-        s, MARGIN, Inches(4.0), Inches(5.6), Inches(2.6),
+        s,
+        MARGIN,
+        Inches(4.0),
+        Inches(5.6),
+        Inches(2.6),
         [
             "Oberry's real transaction data, not synthetic",
             "A scheduled batch-scoring run, not a one-off",
             "Instrumented campaigns with measured lift",
             "Ongoing monitoring for model drift",
         ],
-        size=14, color=RGBColor(0xC9, 0xD4, 0xDE), bullet_color=TEAL, space_after=10,
+        size=14,
+        color=RGBColor(0xC9, 0xD4, 0xDE),
+        bullet_color=TEAL,
+        space_after=10,
     )
     add_text(
-        s, Inches(6.9), Inches(3.55), Inches(5.6), Inches(3.2),
+        s,
+        Inches(6.9),
+        Inches(3.55),
+        Inches(5.6),
+        Inches(3.2),
         "This is a working prototype, validated on synthetic data end to end — the "
         "architecture is real and the pipeline runs today. What's unproven is whether these "
         "exact patterns hold in Oberry's real transaction history, and that's the next step, "
         "not a leap of faith.",
-        size=15, color=WHITE, line_spacing=1.35,
+        size=15,
+        color=WHITE,
+        line_spacing=1.35,
     )
     add_footer(s, dark=True)
-    set_notes(s, (
-        "This is the slide to slow down on. The funnel shows the honest scope: twenty thousand "
-        "members, fourteen thousand three hundred of them scored by the model, twenty-two "
-        "sixty flagged today, representing about 5.4 million baht a year in spend. We have not "
-        "measured what fraction of those we'd actually retain with these campaigns — that "
-        "requires running them against real members and measuring what happens, which is "
-        "exactly the next phase. Everything up to this point is a working prototype on "
-        "synthetic data. The architecture, the leak-free evaluation, the explainability — "
-        "that's all real and reusable. What's left is proving it on Oberry's actual data."
-    ))
+    set_notes(
+        s,
+        (
+            "This is the slide to slow down on. The funnel shows the honest scope: twenty thousand "
+            "members, fourteen thousand three hundred of them scored by the model, twenty-two "
+            "sixty flagged today, representing about 5.4 million baht a year in spend. We have not "
+            "measured what fraction of those we'd actually retain with these campaigns — that "
+            "requires running them against real members and measuring what happens, which is "
+            "exactly the next phase. Everything up to this point is a working prototype on "
+            "synthetic data. The architecture, the leak-free evaluation, the explainability — "
+            "that's all real and reusable. What's left is proving it on Oberry's actual data."
+        ),
+    )
 
 
 def main() -> None:
@@ -495,8 +717,13 @@ def main() -> None:
     prs.slide_height = SH
 
     for builder in [
-        build_slide_1, build_slide_2, build_slide_3, build_slide_4,
-        build_slide_5, build_slide_6, build_slide_7,
+        build_slide_1,
+        build_slide_2,
+        build_slide_3,
+        build_slide_4,
+        build_slide_5,
+        build_slide_6,
+        build_slide_7,
     ]:
         builder(prs, n)
 

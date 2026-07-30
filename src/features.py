@@ -52,20 +52,24 @@ def build_features(cutoff_date: date) -> pd.DataFrame:
         (txns["transaction_date"] > cutoff_ts) & (txns["transaction_date"] <= label_window_end)
     ]
 
-    assert feature_txns["transaction_date"].max() <= cutoff_ts, (
-        "LEAKAGE: a transaction used for features is dated after CUTOFF_DATE"
-    )
-    assert not set(feature_txns.index) & set(label_txns.index), (
-        "LEAKAGE: the same transaction row appears in both the feature and label windows"
-    )
+    assert (
+        feature_txns["transaction_date"].max() <= cutoff_ts
+    ), "LEAKAGE: a transaction used for features is dated after CUTOFF_DATE"
+    assert not set(feature_txns.index) & set(
+        label_txns.index
+    ), "LEAKAGE: the same transaction row appears in both the feature and label windows"
 
     # ── Population: active at some point in the 90 days before cutoff ─────
     active_since = cutoff_ts - pd.Timedelta(days=ACTIVE_WINDOW_DAYS)
-    active_ids = feature_txns.loc[feature_txns["transaction_date"] >= active_since, "member_id"].unique()
+    active_ids = feature_txns.loc[
+        feature_txns["transaction_date"] >= active_since, "member_id"
+    ].unique()
     pop = members[members["member_id"].isin(active_ids)].set_index("member_id").copy()
     feature_txns = feature_txns[feature_txns["member_id"].isin(active_ids)]
 
-    assert set(pop.index) <= set(active_ids), "population includes a member outside the 90-day active window"
+    assert set(pop.index) <= set(
+        active_ids
+    ), "population includes a member outside the 90-day active window"
 
     # ── RFM + tenure ────────────────────────────────────────────────────
     last_txn = feature_txns.groupby("member_id")["transaction_date"].max()
@@ -82,7 +86,9 @@ def build_features(cutoff_date: date) -> pd.DataFrame:
         (home_hits["branch_id"] == home_hits["home_branch"]).groupby(home_hits["member_id"]).mean()
     )
 
-    pop["redemption_count"] = feature_txns.groupby("member_id")["points_redeemed"].apply(lambda s: (s > 0).sum())
+    pop["redemption_count"] = feature_txns.groupby("member_id")["points_redeemed"].apply(
+        lambda s: (s > 0).sum()
+    )
     pop["points_balance"] = (
         feature_txns.groupby("member_id")["points_earned"].sum()
         - feature_txns.groupby("member_id")["points_redeemed"].sum()
@@ -100,34 +106,47 @@ def build_features(cutoff_date: date) -> pd.DataFrame:
     def _visit_history_stats(dates: pd.Series) -> pd.Series:
         d = dates.sort_values()
         if len(d) < 2:
-            return pd.Series({
-                "avg_days_between_visits": np.nan,
-                "gap_trend": np.nan,
-                "days_to_second_purchase": np.nan,
-            })
+            return pd.Series(
+                {
+                    "avg_days_between_visits": np.nan,
+                    "gap_trend": np.nan,
+                    "days_to_second_purchase": np.nan,
+                }
+            )
         gaps = d.diff().dt.total_seconds().div(86400).dropna()
         recent, historical = gaps.tail(3), gaps.iloc[: max(0, len(gaps) - 3)]
         trend = recent.mean() / historical.mean() if len(historical) else np.nan
-        return pd.Series({
-            "avg_days_between_visits": gaps.mean(),
-            "gap_trend": trend,
-            "days_to_second_purchase": gaps.iloc[0],
-        })
+        return pd.Series(
+            {
+                "avg_days_between_visits": gaps.mean(),
+                "gap_trend": trend,
+                "days_to_second_purchase": gaps.iloc[0],
+            }
+        )
 
-    history_df = feature_txns.groupby("member_id")["transaction_date"].apply(_visit_history_stats).unstack()
+    history_df = (
+        feature_txns.groupby("member_id")["transaction_date"].apply(_visit_history_stats).unstack()
+    )
     pop = pop.join(history_df)
 
     cutoff_m30 = cutoff_ts - pd.Timedelta(days=30)
     cutoff_m60 = cutoff_ts - pd.Timedelta(days=60)
-    recent_30 = feature_txns[feature_txns["transaction_date"] > cutoff_m30].groupby("member_id").size()
-    prev_30 = feature_txns[
-        (feature_txns["transaction_date"] > cutoff_m60) & (feature_txns["transaction_date"] <= cutoff_m30)
-    ].groupby("member_id").size()
+    recent_30 = (
+        feature_txns[feature_txns["transaction_date"] > cutoff_m30].groupby("member_id").size()
+    )
+    prev_30 = (
+        feature_txns[
+            (feature_txns["transaction_date"] > cutoff_m60)
+            & (feature_txns["transaction_date"] <= cutoff_m30)
+        ]
+        .groupby("member_id")
+        .size()
+    )
     # +1/+1 (Laplace) smoothing so the ratio is always defined, including
     # for members with zero visits in one of the two windows.
-    pop["visits_last_30d_vs_prev_30d"] = (
-        recent_30.reindex(pop.index, fill_value=0) + 1
-    ) / (prev_30.reindex(pop.index, fill_value=0) + 1)
+    pop["visits_last_30d_vs_prev_30d"] = (recent_30.reindex(pop.index, fill_value=0) + 1) / (
+        prev_30.reindex(pop.index, fill_value=0) + 1
+    )
 
     # ── Label — the ONLY place label_txns is used ──────────────────────
     returned_ids = set(label_txns["member_id"].unique())

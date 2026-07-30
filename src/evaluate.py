@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import joblib
@@ -27,13 +27,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (
-    auc, average_precision_score, confusion_matrix,
-    precision_recall_curve, roc_curve,
+    auc,
+    average_precision_score,
+    confusion_matrix,
+    precision_recall_curve,
+    roc_curve,
 )
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from features import build_features  # noqa: E402
-from model import TEST_CUTOFF, TRAIN_CUTOFF, _prepare_xy  # noqa: E402
+from features import build_features
+from model import TEST_CUTOFF, TRAIN_CUTOFF, _prepare_xy
 
 ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = ROOT / "outputs" / "models"
@@ -42,12 +45,20 @@ METRICS_PATH = ROOT / "outputs" / "metrics.json"
 
 NAVY, TEAL, GOLD, CORAL, SLATE = "#1F3B57", "#2E8B7A", "#D4A03C", "#D65C4A", "#5B7C99"
 
-plt.rcParams.update({
-    "figure.dpi": 150, "savefig.dpi": 150, "font.size": 11,
-    "axes.spines.top": False, "axes.spines.right": False,
-    "axes.grid": True, "grid.alpha": 0.25, "grid.linewidth": 0.5,
-    "figure.facecolor": "white", "axes.facecolor": "white",
-})
+plt.rcParams.update(
+    {
+        "figure.dpi": 150,
+        "savefig.dpi": 150,
+        "font.size": 11,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": True,
+        "grid.alpha": 0.25,
+        "grid.linewidth": 0.5,
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+    }
+)
 
 PRECISION_FLOOR = 0.70  # missing a departing member costs more than a
 # wasted coupon, so we deliberately trade precision down to this floor to
@@ -84,7 +95,9 @@ def choose_threshold(y_true: np.ndarray, proba: np.ndarray) -> dict:
 def main() -> None:
     preprocessing = joblib.load(MODELS_DIR / "preprocessing.pkl")
     imputer, scaler, feature_cols = (
-        preprocessing["imputer"], preprocessing["scaler"], preprocessing["feature_columns"]
+        preprocessing["imputer"],
+        preprocessing["scaler"],
+        preprocessing["feature_columns"],
     )
 
     test_df = build_features(TEST_CUTOFF)
@@ -101,7 +114,10 @@ def main() -> None:
 
     # ── 1. ROC curves ───────────────────────────────────────────────────
     fig, ax = plt.subplots(figsize=(7, 6.5))
-    for name, proba, color in [("Logistic regression", lr_proba, TEAL), ("XGBoost", xgb_proba, NAVY)]:
+    for name, proba, color in [
+        ("Logistic regression", lr_proba, TEAL),
+        ("XGBoost", xgb_proba, NAVY),
+    ]:
         fpr, tpr, _ = roc_curve(y_test, proba)
         ax.plot(fpr, tpr, color=color, linewidth=2, label=f"{name} (AUC={auc(fpr, tpr):.3f})")
     ax.plot([0, 1], [0, 1], color=SLATE, linestyle="--", linewidth=1, label="Random guess")
@@ -115,11 +131,26 @@ def main() -> None:
 
     # ── 2. Precision-recall curves ──────────────────────────────────────
     fig, ax = plt.subplots(figsize=(7, 6.5))
-    for name, proba, color in [("Logistic regression", lr_proba, TEAL), ("XGBoost", xgb_proba, NAVY)]:
+    for name, proba, color in [
+        ("Logistic regression", lr_proba, TEAL),
+        ("XGBoost", xgb_proba, NAVY),
+    ]:
         p, r, _ = precision_recall_curve(y_test, proba)
-        ax.plot(r, p, color=color, linewidth=2, label=f"{name} (AP={average_precision_score(y_test, proba):.3f})")
+        ax.plot(
+            r,
+            p,
+            color=color,
+            linewidth=2,
+            label=f"{name} (AP={average_precision_score(y_test, proba):.3f})",
+        )
     base_rate = y_test.mean()
-    ax.axhline(base_rate, color=SLATE, linestyle="--", linewidth=1, label=f"No-skill baseline ({base_rate:.2f})")
+    ax.axhline(
+        base_rate,
+        color=SLATE,
+        linestyle="--",
+        linewidth=1,
+        label=f"No-skill baseline ({base_rate:.2f})",
+    )
     ax.set_xlabel("Recall")
     ax.set_ylabel("Precision")
     ax.set_title("Precision-Recall curve")
@@ -133,12 +164,16 @@ def main() -> None:
     print("=" * 60)
     print("THRESHOLD SELECTION")
     print("=" * 60)
-    print("Rule: maximize recall subject to precision >= "
-          f"{PRECISION_FLOOR:.2f} — missing a departing member costs more "
-          "than a wasted coupon, so precision is the floor, not the target.")
+    print(
+        "Rule: maximize recall subject to precision >= "
+        f"{PRECISION_FLOOR:.2f} — missing a departing member costs more "
+        "than a wasted coupon, so precision is the floor, not the target."
+    )
     if not chosen["met_precision_floor"]:
-        print(f"WARNING: no threshold reaches precision >= {PRECISION_FLOOR:.2f}; "
-              "using the best precision actually achievable instead.")
+        print(
+            f"WARNING: no threshold reaches precision >= {PRECISION_FLOOR:.2f}; "
+            "using the best precision actually achievable instead."
+        )
     print(f"Chosen threshold: {chosen['threshold']:.4f}")
     print(f"  -> precision: {chosen['precision']:.4f}")
     print(f"  -> recall:    {chosen['recall']:.4f}")
@@ -155,9 +190,19 @@ def main() -> None:
     for i in range(2):
         for j in range(2):
             label, count, color = cells[i][j]
-            ax.add_patch(plt.Rectangle((j, 1 - i), 1, 1, facecolor=color, edgecolor="white", linewidth=2))
-            ax.text(j + 0.5, 1 - i + 0.5, f"{label}\n{count:,}", ha="center", va="center",
-                     fontsize=13, fontweight="bold", color="white")
+            ax.add_patch(
+                plt.Rectangle((j, 1 - i), 1, 1, facecolor=color, edgecolor="white", linewidth=2)
+            )
+            ax.text(
+                j + 0.5,
+                1 - i + 0.5,
+                f"{label}\n{count:,}",
+                ha="center",
+                va="center",
+                fontsize=13,
+                fontweight="bold",
+                color="white",
+            )
     ax.set_xlim(0, 2)
     ax.set_ylim(0, 2)
     ax.set_xticks([0.5, 1.5])
@@ -171,11 +216,13 @@ def main() -> None:
     plt.close(fig)
 
     # ── 4. Decile lift chart ────────────────────────────────────────────
-    lift_df = pd.DataFrame({
-        "churn_proba": xgb_proba,
-        "churned": y_test,
-        "monetary": test_df["monetary"].values,
-    })
+    lift_df = pd.DataFrame(
+        {
+            "churn_proba": xgb_proba,
+            "churned": y_test,
+            "monetary": test_df["monetary"].values,
+        }
+    )
     # Revenue at risk = monetary * churn_proba (expected loss), NOT a raw
     # monetary sum. Raw sum was tried first and produced a misleading chart:
     # Champions (huge historical spend, very low churn probability because
@@ -190,21 +237,43 @@ def main() -> None:
         lift_df["churn_proba"].rank(method="first", ascending=False), 10, labels=range(1, 11)
     )
     decile_stats = lift_df.groupby("decile", observed=True).agg(
-        churn_rate=("churned", "mean"), revenue_at_risk=("expected_loss", "sum"),
+        churn_rate=("churned", "mean"),
+        revenue_at_risk=("expected_loss", "sum"),
     )
 
     fig, ax1 = plt.subplots(figsize=(10, 5.5))
-    ax1.bar(decile_stats.index.astype(str), decile_stats["churn_rate"] * 100,
-             color=NAVY, alpha=0.85, label="Actual churn rate", zorder=2)
-    ax1.axhline(base_rate * 100, color=SLATE, linestyle="--", linewidth=1,
-                 label=f"Overall rate ({base_rate:.1%})", zorder=1)
+    ax1.bar(
+        decile_stats.index.astype(str),
+        decile_stats["churn_rate"] * 100,
+        color=NAVY,
+        alpha=0.85,
+        label="Actual churn rate",
+        zorder=2,
+    )
+    ax1.axhline(
+        base_rate * 100,
+        color=SLATE,
+        linestyle="--",
+        linewidth=1,
+        label=f"Overall rate ({base_rate:.1%})",
+        zorder=1,
+    )
     ax1.set_xlabel("Risk decile (1 = highest predicted risk)")
     ax1.set_ylabel("Actual churn rate (%)", color=NAVY)
 
     ax2 = ax1.twinx()
-    ax2.plot(decile_stats.index.astype(str), decile_stats["revenue_at_risk"] / 1000,
-              color=CORAL, marker="o", linewidth=2, label="Expected revenue at risk (฿k)", zorder=3)
-    ax2.set_ylabel("Expected revenue at risk\n(spend × churn probability, THB thousands)", color=CORAL)
+    ax2.plot(
+        decile_stats.index.astype(str),
+        decile_stats["revenue_at_risk"] / 1000,
+        color=CORAL,
+        marker="o",
+        linewidth=2,
+        label="Expected revenue at risk (฿k)",
+        zorder=3,
+    )
+    ax2.set_ylabel(
+        "Expected revenue at risk\n(spend × churn probability, THB thousands)", color=CORAL
+    )
     ax2.grid(False)
 
     lines1, labels1 = ax1.get_legend_handles_labels()
@@ -217,10 +286,10 @@ def main() -> None:
 
     # ── metrics.json ─────────────────────────────────────────────────────
     metrics = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "train_cutoff": TRAIN_CUTOFF.isoformat(),
         "test_cutoff": TEST_CUTOFF.isoformat(),
-        "test_set_size": int(len(y_test)),
+        "test_set_size": len(y_test),
         "test_churn_rate": float(base_rate),
         "models": {
             "logistic_regression": {
@@ -243,8 +312,10 @@ def main() -> None:
             ),
         },
         "confusion_matrix": {
-            "true_stay": int(tn), "false_alarm": int(fp),
-            "missed_churn": int(fn), "caught_churn": int(tp),
+            "true_stay": int(tn),
+            "false_alarm": int(fp),
+            "missed_churn": int(fn),
+            "caught_churn": int(tp),
         },
         "model_recall": chosen["recall"],  # dashboard KPI convenience field
     }
@@ -252,7 +323,9 @@ def main() -> None:
 
     print()
     print(f"Saved: {METRICS_PATH}")
-    print(f"Confusion matrix @ threshold: caught={tp:,} missed={fn:,} false_alarm={fp:,} true_stay={tn:,}")
+    print(
+        f"Confusion matrix @ threshold: caught={tp:,} missed={fn:,} false_alarm={fp:,} true_stay={tn:,}"
+    )
 
 
 if __name__ == "__main__":

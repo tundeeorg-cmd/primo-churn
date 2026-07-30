@@ -17,9 +17,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
@@ -32,16 +32,27 @@ RANDOM_STATE = 42
 
 NAVY, TEAL, GOLD, CORAL, SLATE = "#1F3B57", "#2E8B7A", "#D4A03C", "#D65C4A", "#5B7C99"
 SEGMENT_COLORS = {
-    "Champions": NAVY, "Loyal": TEAL, "At-risk regulars": GOLD,
-    "Hibernating": CORAL, "One-and-done": SLATE,
+    "Champions": NAVY,
+    "Loyal": TEAL,
+    "At-risk regulars": GOLD,
+    "Hibernating": CORAL,
+    "One-and-done": SLATE,
 }
 
-plt.rcParams.update({
-    "figure.dpi": 150, "savefig.dpi": 150, "font.size": 11,
-    "axes.spines.top": False, "axes.spines.right": False,
-    "axes.grid": True, "grid.alpha": 0.25, "grid.linewidth": 0.5,
-    "figure.facecolor": "white", "axes.facecolor": "white",
-})
+plt.rcParams.update(
+    {
+        "figure.dpi": 150,
+        "savefig.dpi": 150,
+        "font.size": 11,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.grid": True,
+        "grid.alpha": 0.25,
+        "grid.linewidth": 0.5,
+        "figure.facecolor": "white",
+        "axes.facecolor": "white",
+    }
+)
 
 
 def sweep_k(X: np.ndarray, ks: range) -> tuple[list[float], list[float]]:
@@ -166,16 +177,26 @@ def main() -> None:
         size = 300 + 3200 * (row["monetary"] / max_monetary)
         radius_pts = (size / np.pi) ** 0.5
         ax.scatter(
-            row["recency_days"], row["frequency"], s=size,
-            color=SEGMENT_COLORS[row["segment"]], alpha=0.75,
-            edgecolors="white", linewidth=1.5, zorder=3,
+            row["recency_days"],
+            row["frequency"],
+            s=size,
+            color=SEGMENT_COLORS[row["segment"]],
+            alpha=0.75,
+            edgecolors="white",
+            linewidth=1.5,
+            zorder=3,
         )
         ax.annotate(
             f"{row['segment']} ({row['share']:.0%})",
             (row["recency_days"], row["frequency"]),
-            xytext=(0, radius_pts + 10), textcoords="offset points",
-            ha="center", va="bottom", fontsize=10, fontweight="bold",
-            color=SEGMENT_COLORS[row["segment"]], zorder=4,
+            xytext=(0, radius_pts + 10),
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+            color=SEGMENT_COLORS[row["segment"]],
+            zorder=4,
         )
 
     x_pad = max(profile["recency_days"].max() * 0.15, 5)
@@ -192,7 +213,16 @@ def main() -> None:
     df.to_csv(PROCESSED / "features.csv", index=False)
 
     segments_out = profile.reset_index()[
-        ["segment", "cluster", "size", "share", "recency_days", "frequency", "monetary", "tenure_days"]
+        [
+            "segment",
+            "cluster",
+            "size",
+            "share",
+            "recency_days",
+            "frequency",
+            "monetary",
+            "tenure_days",
+        ]
     ].sort_values("share", ascending=False)
     segments_out.to_csv(PROCESSED / "segments.csv", index=False)
 
