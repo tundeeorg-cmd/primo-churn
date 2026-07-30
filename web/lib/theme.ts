@@ -12,7 +12,13 @@ export const SEGMENT_COLORS: Record<string, string> = {
   "One-and-done": "#5b7c99", // slate
 };
 
-export const SEGMENT_ORDER = ["Champions", "Loyal", "At-risk regulars", "Hibernating", "One-and-done"];
+export const SEGMENT_ORDER = [
+  "Champions",
+  "Loyal",
+  "At-risk regulars",
+  "Hibernating",
+  "One-and-done",
+];
 
 export function segmentColor(segment: string): string {
   return SEGMENT_COLORS[segment] ?? "#5b7c99";
@@ -26,7 +32,10 @@ export function segmentColor(segment: string): string {
  * own decision boundary. Gold = risk emphasis, coral = highest alarm
  * (PROJECT_BRIEF.md Prompt 11's colour rule) — never used decoratively.
  */
-export function riskBadge(probability: number): { label: string; color: string } {
+export function riskBadge(probability: number): {
+  label: string;
+  color: string;
+} {
   if (probability >= 0.9) return { label: "Very high", color: "#d65c4a" };
   if (probability >= 0.8) return { label: "High", color: "#d4a03c" };
   return { label: "Elevated", color: "#5b7c99" };

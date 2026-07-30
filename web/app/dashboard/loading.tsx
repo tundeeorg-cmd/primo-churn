@@ -1,5 +1,9 @@
 function Block({ className = "" }: { className?: string }) {
-  return <div className={`rounded-xl border border-line bg-paper animate-pulse ${className}`} />;
+  return (
+    <div
+      className={`rounded-xl border border-line bg-paper animate-pulse ${className}`}
+    />
+  );
 }
 
 export default function DashboardLoading() {

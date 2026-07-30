@@ -13,7 +13,8 @@ export const th = {
   "brand.dashboardTitle": "Oberry Member Retention Radar",
 
   // ── Dashboard header ─────────────────────────────────────────────────
-  "dashboard.subtitle": "รายชื่อสมาชิกที่ต้องดูแลวันนี้ เรียงตามมูลค่าที่มีความเสี่ยงจะสูญเสียมากที่สุดก่อน",
+  "dashboard.subtitle":
+    "รายชื่อสมาชิกที่ต้องดูแลวันนี้ เรียงตามมูลค่าที่มีความเสี่ยงจะสูญเสียมากที่สุดก่อน",
   "dashboard.updatedDaily": "อัปเดตทุกวัน", // glossary
 
   // ── Shared footer note (both / and /dashboard) ──────────────────────────
@@ -32,13 +33,15 @@ export const th = {
   "kpi.flaggedCaptionFiltered": "ตามตัวกรองที่เลือกอยู่",
   "kpi.flaggedCaptionThreshold": "ที่เกณฑ์ซึ่งโมเดลเลือกไว้",
   "kpi.revenueAtRisk": "รายได้ที่มีความเสี่ยง (30 วัน)",
-  "kpi.revenueAtRiskCaption": "ยอดใช้จ่ายย้อนหลัง 12 เดือนของสมาชิกกลุ่มเสี่ยง ÷ 12",
+  "kpi.revenueAtRiskCaption":
+    "ยอดใช้จ่ายย้อนหลัง 12 เดือนของสมาชิกกลุ่มเสี่ยง ÷ 12",
   "kpi.modelRecall": "ความครอบคลุมของโมเดล (Recall)", // glossary
   "kpi.modelRecallCaption": "ที่ความแม่นยำ {precision}%",
 
   // ── At-risk table ────────────────────────────────────────────────────
   "table.emptyTitle": "ไม่มีสมาชิกที่ตรงกับตัวกรองนี้",
-  "table.emptyBody": "ลองลดเกณฑ์ความเสี่ยง หรือล้างตัวกรองกลุ่ม/ระดับสมาชิกด้านบน",
+  "table.emptyBody":
+    "ลองลดเกณฑ์ความเสี่ยง หรือล้างตัวกรองกลุ่ม/ระดับสมาชิกด้านบน",
   "table.colMember": "สมาชิก",
   "table.colValueAtRisk": "มูลค่าที่มีความเสี่ยง",
 
@@ -52,14 +55,16 @@ export const th = {
   "controls.filters": "ตัวกรอง",
   "controls.clearFilters": "ล้างตัวกรอง",
   "controls.minRiskToFlag": "เกณฑ์ความเสี่ยงขั้นต่ำที่จะแจ้งเตือน",
-  "controls.meetBar": "มีสมาชิกกลุ่มเสี่ยง {visible} จาก {total} คนที่ผ่านเกณฑ์นี้",
+  "controls.meetBar":
+    "มีสมาชิกกลุ่มเสี่ยง {visible} จาก {total} คนที่ผ่านเกณฑ์นี้",
 
   // ── Segment distribution chart ───────────────────────────────────────
   "chart.heading": "สมาชิกแยกตามกลุ่ม — {count} สมาชิก", // "สมาชิกแยกตามกลุ่ม" portion is glossary
 
   // ── Member detail panel ──────────────────────────────────────────────
   "detail.emptyTitle": "เลือกสมาชิก",
-  "detail.emptyBody": "เลือกสมาชิกจากรายการเพื่อดูสาเหตุความเสี่ยงและสิ่งที่ควรทำ",
+  "detail.emptyBody":
+    "เลือกสมาชิกจากรายการเพื่อดูสาเหตุความเสี่ยงและสิ่งที่ควรทำ",
   "detail.whyAtRisk": "สาเหตุที่มีความเสี่ยง",
   "detail.churnProbability": "โอกาสที่จะเลิกใช้งาน", // glossary
   "detail.valueProtected": "มูลค่าโดยประมาณที่รักษาไว้ได้",
@@ -82,9 +87,11 @@ export const th = {
   // ── Recommended actions, keyed by segment (see lib/i18n/labels.ts) ──────
   // Not in the approved glossary — translated here for this pass; flag if
   // wording should change.
-  "action.champions": "สิทธิพิเศษ VIP, สิทธิ์ทดลองเมนูใหม่ก่อนใคร, ชวนเพื่อนเข้าร่วม",
+  "action.champions":
+    "สิทธิพิเศษ VIP, สิทธิ์ทดลองเมนูใหม่ก่อนใคร, ชวนเพื่อนเข้าร่วม",
   "action.loyal": "กระตุ้นให้เลื่อนระดับสมาชิก, เสนอชุดสิทธิพิเศษเฉพาะบุคคล",
-  "action.atRiskRegulars": 'คูปองส่วนลด 15% เพื่อดึงกลับ + ภารกิจ LINE "คิดถึงนะ"',
+  "action.atRiskRegulars":
+    'คูปองส่วนลด 15% เพื่อดึงกลับ + ภารกิจ LINE "คิดถึงนะ"',
   "action.hibernating": "แจกเครื่องดื่มฟรีเพื่อดึงกลับ + แบบสอบถามสั้น 1 ข้อ",
   "action.oneAndDone": "ภารกิจแนะนำการใช้งาน, กระตุ้นให้กลับมาเยือนครั้งที่สอง",
 
@@ -166,7 +173,8 @@ export const th = {
   "stats.churnRate": "อัตราการเลิกใช้งาน",
 
   // ── Footer (Part B1 — rebuilt to match tundee.org's 3-column footer) ────
-  "footer.brandTagline": "ระบบทำนายการเลิกใช้งานและแบ่งกลุ่มสมาชิกสำหรับโปรแกรมสมาชิก",
+  "footer.brandTagline":
+    "ระบบทำนายการเลิกใช้งานและแบ่งกลุ่มสมาชิกสำหรับโปรแกรมสมาชิก",
   "footer.stackTitle": "เทคโนโลยีที่ใช้",
   "footer.linksTitle": "ลิงก์",
 } as const;

@@ -89,9 +89,17 @@ export interface Database {
   public: {
     Tables: {
       members: { Row: Member; Insert: Member; Update: Partial<Member> };
-      at_risk_members: { Row: AtRiskMember; Insert: AtRiskMember; Update: Partial<AtRiskMember> };
+      at_risk_members: {
+        Row: AtRiskMember;
+        Insert: AtRiskMember;
+        Update: Partial<AtRiskMember>;
+      };
       segments: { Row: Segment; Insert: Segment; Update: Partial<Segment> };
-      actions: { Row: ActionRow; Insert: ActionRow; Update: Partial<ActionRow> };
+      actions: {
+        Row: ActionRow;
+        Insert: ActionRow;
+        Update: Partial<ActionRow>;
+      };
       metrics: { Row: Metrics; Insert: Metrics; Update: Partial<Metrics> };
     };
   };
@@ -103,8 +111,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
     "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-      "Copy the two NEXT_PUBLIC_* vars into web/.env.local (see PROJECT_BRIEF.md Part B5)."
+      "Copy the two NEXT_PUBLIC_* vars into web/.env.local (see PROJECT_BRIEF.md Part B5).",
   );
 }
 
-export const supabase: SupabaseClient<Database> = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase: SupabaseClient<Database> = createClient(
+  supabaseUrl,
+  supabaseAnonKey,
+);

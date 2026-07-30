@@ -22,7 +22,9 @@ export default function LanguageSwitcher() {
         onClick={() => setLocale("th")}
         aria-pressed={locale === "th"}
         className={`px-3 py-1 text-xs font-medium rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy ${
-          locale === "th" ? "bg-navy text-white" : "text-ink-muted hover:text-navy"
+          locale === "th"
+            ? "bg-navy text-white"
+            : "text-ink-muted hover:text-navy"
         }`}
       >
         ไทย
@@ -32,7 +34,9 @@ export default function LanguageSwitcher() {
         onClick={() => setLocale("en")}
         aria-pressed={locale === "en"}
         className={`px-3 py-1 text-xs font-medium rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy ${
-          locale === "en" ? "bg-navy text-white" : "text-ink-muted hover:text-navy"
+          locale === "en"
+            ? "bg-navy text-white"
+            : "text-ink-muted hover:text-navy"
         }`}
       >
         EN

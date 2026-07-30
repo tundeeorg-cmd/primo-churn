@@ -1,9 +1,20 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { setClientLocaleCookie } from "./cookie";
-import { t as translate, tf as translateFormat, type Locale, type TranslationKey } from "./index";
+import {
+  t as translate,
+  tf as translateFormat,
+  type Locale,
+  type TranslationKey,
+} from "./index";
 
 interface LanguageContextValue {
   locale: Locale;
@@ -41,7 +52,7 @@ export function LanguageProvider({
       // must not lose page state or reset filters" true.
       router.refresh();
     },
-    [router]
+    [router],
   );
 
   const value = useMemo<LanguageContextValue>(
@@ -49,16 +60,22 @@ export function LanguageProvider({
       locale,
       setLocale,
       t: (key: TranslationKey) => translate(locale, key),
-      tf: (key: TranslationKey, vars: Record<string, string | number>) => translateFormat(locale, key, vars),
+      tf: (key: TranslationKey, vars: Record<string, string | number>) =>
+        translateFormat(locale, key, vars),
     }),
-    [locale, setLocale]
+    [locale, setLocale],
   );
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
+  );
 }
 
 export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage() must be used within a LanguageProvider");
+  if (!ctx)
+    throw new Error("useLanguage() must be used within a LanguageProvider");
   return ctx;
 }

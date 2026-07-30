@@ -47,5 +47,9 @@ export function formatCount(value: number, locale: Locale): string {
 export function formatDate(date: Date | string, locale: Locale): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const intlLocale = locale === "th" ? "th-TH-u-ca-gregory" : "en-US";
-  return new Intl.DateTimeFormat(intlLocale, { year: "numeric", month: "long", day: "numeric" }).format(d);
+  return new Intl.DateTimeFormat(intlLocale, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(d);
 }

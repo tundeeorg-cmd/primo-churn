@@ -3,7 +3,12 @@
 import type { AtRiskMember } from "@/lib/supabase";
 import { riskBadge, segmentColor } from "@/lib/theme";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { actionLabel, riskLevelLabel, segmentLabel, tierLabel } from "@/lib/i18n/labels";
+import {
+  actionLabel,
+  riskLevelLabel,
+  segmentLabel,
+  tierLabel,
+} from "@/lib/i18n/labels";
 import { formatThb } from "@/lib/i18n/format";
 
 interface Props {
@@ -16,22 +21,28 @@ export default function MemberDetailPanel({ member }: Props) {
   if (!member) {
     return (
       <div className="rounded-xl border border-line bg-paper p-8 h-full flex flex-col items-center justify-center text-center">
-        <p className="font-display text-lg text-navy mb-1">{t("detail.emptyTitle")}</p>
-        <p className="text-sm text-ink-muted max-w-[26ch]">{t("detail.emptyBody")}</p>
+        <p className="font-display text-lg text-navy mb-1">
+          {t("detail.emptyTitle")}
+        </p>
+        <p className="text-sm text-ink-muted max-w-[26ch]">
+          {t("detail.emptyBody")}
+        </p>
       </div>
     );
   }
 
   const risk = riskBadge(member.churn_probability);
   const reasons = [member.reason_1, member.reason_2, member.reason_3].filter(
-    (r): r is string => !!r
+    (r): r is string => !!r,
   );
 
   return (
     <div className="rounded-xl border border-line bg-paper p-6">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="font-display text-xl font-semibold text-navy">{member.member_id}</p>
+          <p className="font-display text-xl font-semibold text-navy">
+            {member.member_id}
+          </p>
           <p className="text-sm text-ink-muted mt-0.5">
             {tierLabel(member.tier)} ·{" "}
             <span className="inline-flex items-center gap-1.5">
@@ -49,7 +60,8 @@ export default function MemberDetailPanel({ member }: Props) {
           style={{ backgroundColor: risk.color }}
           title={t("detail.churnProbability")}
         >
-          {(member.churn_probability * 100).toFixed(0)}% · {riskLevelLabel(risk.label, locale)}
+          {(member.churn_probability * 100).toFixed(0)}% ·{" "}
+          {riskLevelLabel(risk.label, locale)}
         </span>
       </div>
 
@@ -80,7 +92,9 @@ export default function MemberDetailPanel({ member }: Props) {
         <p className="text-xs font-medium uppercase tracking-wide text-ink-muted mb-1">
           {t("action.recommended")}
         </p>
-        <p className="text-sm text-ink">{actionLabel(member.segment, member.recommended_action, locale)}</p>
+        <p className="text-sm text-ink">
+          {actionLabel(member.segment, member.recommended_action, locale)}
+        </p>
       </div>
 
       <div className="flex items-baseline justify-between">
@@ -88,7 +102,8 @@ export default function MemberDetailPanel({ member }: Props) {
           {t("detail.valueProtected")}
         </p>
         <p className="font-display text-lg font-semibold text-navy tabular-figures">
-          {formatThb(member.annual_value_thb, locale)}/{locale === "th" ? "ปี" : "yr"}
+          {formatThb(member.annual_value_thb, locale)}/
+          {locale === "th" ? "ปี" : "yr"}
         </p>
       </div>
     </div>

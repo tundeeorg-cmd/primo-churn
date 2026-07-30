@@ -12,7 +12,11 @@ const PIPELINE_STAGES = [
   { n: "03", titleKey: "pipeline.03.title", bodyKey: "pipeline.03.body" },
   { n: "04", titleKey: "pipeline.04.title", bodyKey: "pipeline.04.body" },
   { n: "05", titleKey: "pipeline.05.title", bodyKey: "pipeline.05.body" },
-] satisfies Array<{ n: string; titleKey: TranslationKey; bodyKey: TranslationKey }>;
+] satisfies Array<{
+  n: string;
+  titleKey: TranslationKey;
+  bodyKey: TranslationKey;
+}>;
 
 const RESULTS = [
   {
@@ -43,7 +47,13 @@ const RESULTS = [
     altKey: "results.decileLift.alt",
     captionKey: "results.decileLift.caption",
   },
-] satisfies Array<{ src: string; width: number; height: number; altKey: TranslationKey; captionKey: TranslationKey }>;
+] satisfies Array<{
+  src: string;
+  width: number;
+  height: number;
+  altKey: TranslationKey;
+  captionKey: TranslationKey;
+}>;
 
 // Segment/risk stay the raw English enum values used elsewhere in the app
 // (segment.py's cluster names, recommend.py's action lookup) — only the
@@ -51,8 +61,16 @@ const RESULTS = [
 // Not Supabase data (this table is static marketing copy), but kept
 // consistent with the same enum vocabulary on purpose.
 const ACTIONS = [
-  { segment: "Champions", riskKey: "action.riskLow", action: "VIP perks, early access to new drinks, referral ask" },
-  { segment: "Loyal", riskKey: "action.riskLowMed", action: "Tier-up nudge, personalized bundle" },
+  {
+    segment: "Champions",
+    riskKey: "action.riskLow",
+    action: "VIP perks, early access to new drinks, referral ask",
+  },
+  {
+    segment: "Loyal",
+    riskKey: "action.riskLowMed",
+    action: "Tier-up nudge, personalized bundle",
+  },
   {
     segment: "At-risk regulars",
     riskKey: "action.riskHigh",
@@ -63,7 +81,11 @@ const ACTIONS = [
     riskKey: "action.riskVeryHigh",
     action: "Bounce-back free drink + one-question why-survey",
   },
-  { segment: "One-and-done", riskKey: "action.riskHigh", action: "Onboarding mission, second-visit nudge" },
+  {
+    segment: "One-and-done",
+    riskKey: "action.riskHigh",
+    action: "Onboarding mission, second-visit nudge",
+  },
 ] satisfies Array<{ segment: string; riskKey: TranslationKey; action: string }>;
 
 const SEGMENT_DOT: Record<string, string> = {
@@ -89,7 +111,10 @@ export default async function Home() {
   const heroStats = [
     { value: "19%", labelKey: "stats.churnRate" as TranslationKey },
     { value: "57%", labelKey: "kpi.modelRecall" as TranslationKey },
-    { value: formatCount(2260, locale), labelKey: "kpi.flaggedAtRisk" as TranslationKey },
+    {
+      value: formatCount(2260, locale),
+      labelKey: "kpi.flaggedAtRisk" as TranslationKey,
+    },
   ];
 
   return (
@@ -97,7 +122,9 @@ export default async function Home() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="max-w-[1000px] mx-auto px-6 pt-16 pb-14 sm:pt-24 sm:pb-20">
         <div className="flex items-center justify-between gap-4 mb-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-navy">{tr("brand.overline")}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-navy">
+            {tr("brand.overline")}
+          </p>
           <LanguageSwitcher />
         </div>
         <h1 className="font-display text-4xl sm:text-6xl font-semibold text-navy leading-[1.05] mb-6 max-w-[16ch]">
@@ -106,7 +133,9 @@ export default async function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 items-center mb-10">
           <p className="text-lg text-ink leading-relaxed max-w-[52ch]">
-            <em className="not-italic text-ink-muted">{tr("hero.narrativeStory")}</em>{" "}
+            <em className="not-italic text-ink-muted">
+              {tr("hero.narrativeStory")}
+            </em>{" "}
             {tr("hero.narrativeConclusion")}
           </p>
 
@@ -117,7 +146,14 @@ export default async function Home() {
             role="img"
             aria-label={tr("hero.sparklineAriaLabel")}
           >
-            <line x1="8" y1="45" x2="180" y2="45" stroke="#e4e1d8" strokeWidth="2" />
+            <line
+              x1="8"
+              y1="45"
+              x2="180"
+              y2="45"
+              stroke="#e4e1d8"
+              strokeWidth="2"
+            />
             <line
               x1="180"
               y1="45"
@@ -131,7 +167,14 @@ export default async function Home() {
               <circle key={i} cx={x} cy={45} r={i < 4 ? 5 : 6} fill="#1f3b57" />
             ))}
             <circle cx={180} cy={45} r={6} fill="#d65c4a" />
-            <text x="180" y="72" textAnchor="middle" className="fill-coral" fontSize="11" fontWeight="600">
+            <text
+              x="180"
+              y="72"
+              textAnchor="middle"
+              className="fill-coral"
+              fontSize="11"
+              fontWeight="600"
+            >
               {tr("hero.sixtyDaysSilent")}
             </text>
           </svg>
@@ -155,7 +198,9 @@ export default async function Home() {
                 <div className="font-display text-2xl font-bold text-navy leading-none mb-1 tabular-figures">
                   {stat.value}
                 </div>
-                <div className="text-[13px] text-ink-muted leading-tight">{tr(stat.labelKey)}</div>
+                <div className="text-[13px] text-ink-muted leading-tight">
+                  {tr(stat.labelKey)}
+                </div>
               </div>
             ))}
           </div>
@@ -180,12 +225,21 @@ export default async function Home() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {PIPELINE_STAGES.map((stage) => (
-            <div key={stage.n} className="rounded-xl border border-line bg-paper p-5">
+            <div
+              key={stage.n}
+              className="rounded-xl border border-line bg-paper p-5"
+            >
               {/* tundee.org's thin, near-invisible step-number treatment
                   (Part B1), not Primo's original bold teal text-3xl */}
-              <p className="text-[0.7rem] text-line tracking-[1px] mb-3">{stage.n}</p>
-              <h3 className="font-semibold text-navy mb-2 leading-snug">{tr(stage.titleKey)}</h3>
-              <p className="text-sm text-ink-muted leading-relaxed">{tr(stage.bodyKey)}</p>
+              <p className="text-[0.7rem] text-line tracking-[1px] mb-3">
+                {stage.n}
+              </p>
+              <h3 className="font-semibold text-navy mb-2 leading-snug">
+                {tr(stage.titleKey)}
+              </h3>
+              <p className="text-sm text-ink-muted leading-relaxed">
+                {tr(stage.bodyKey)}
+              </p>
             </div>
           ))}
         </div>
@@ -223,19 +277,30 @@ export default async function Home() {
         <h2 className="font-display text-2xl sm:text-3xl font-semibold text-navy mb-3">
           {tr("recommends.heading")}
         </h2>
-        <p className="text-ink-muted mb-8 max-w-[60ch]">{tr("recommends.intro")}</p>
+        <p className="text-ink-muted mb-8 max-w-[60ch]">
+          {tr("recommends.intro")}
+        </p>
         <div className="rounded-xl border border-line bg-paper overflow-hidden">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-line bg-canvas text-left text-xs uppercase tracking-wide text-ink-muted">
-                <th className="px-5 py-3 font-medium">{tr("common.segment")}</th>
-                <th className="px-5 py-3 font-medium">{tr("recommends.colTypicalRisk")}</th>
-                <th className="px-5 py-3 font-medium">{tr("action.recommended")}</th>
+                <th className="px-5 py-3 font-medium">
+                  {tr("common.segment")}
+                </th>
+                <th className="px-5 py-3 font-medium">
+                  {tr("recommends.colTypicalRisk")}
+                </th>
+                <th className="px-5 py-3 font-medium">
+                  {tr("action.recommended")}
+                </th>
               </tr>
             </thead>
             <tbody>
               {ACTIONS.map((row) => (
-                <tr key={row.segment} className="border-b border-line last:border-0">
+                <tr
+                  key={row.segment}
+                  className="border-b border-line last:border-0"
+                >
                   <td className="px-5 py-3.5">
                     <span className="inline-flex items-center gap-2 font-medium text-navy">
                       <span
@@ -246,8 +311,12 @@ export default async function Home() {
                       {segmentLabel(row.segment, locale)}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-ink-muted">{tr(row.riskKey)}</td>
-                  <td className="px-5 py-3.5 text-ink">{actionLabel(row.segment, row.action, locale)}</td>
+                  <td className="px-5 py-3.5 text-ink-muted">
+                    {tr(row.riskKey)}
+                  </td>
+                  <td className="px-5 py-3.5 text-ink">
+                    {actionLabel(row.segment, row.action, locale)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -264,8 +333,12 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
             {/* Brand */}
             <div>
-              <p className="font-display text-lg font-semibold text-white mb-3">{tr("brand.overline")}</p>
-              <p className="text-sm text-white/50 leading-relaxed">{tr("footer.brandTagline")}</p>
+              <p className="font-display text-lg font-semibold text-white mb-3">
+                {tr("brand.overline")}
+              </p>
+              <p className="text-sm text-white/50 leading-relaxed">
+                {tr("footer.brandTagline")}
+              </p>
             </div>
 
             {/* Built with */}
@@ -307,7 +380,9 @@ export default async function Home() {
           </div>
 
           <div className="pt-6 border-t border-white/[0.08] text-center">
-            <p className="text-xs text-white/25">{tr("footer.syntheticNote")}</p>
+            <p className="text-xs text-white/25">
+              {tr("footer.syntheticNote")}
+            </p>
           </div>
         </div>
       </footer>

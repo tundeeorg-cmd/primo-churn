@@ -17,7 +17,12 @@ interface Props {
   activeMemberCount: number;
 }
 
-export default function Dashboard({ atRiskMembers, segments, metrics, activeMemberCount }: Props) {
+export default function Dashboard({
+  atRiskMembers,
+  segments,
+  metrics,
+  activeMemberCount,
+}: Props) {
   const { locale, t, tf } = useLanguage();
   const minThreshold = metrics?.threshold_value ?? 0.5;
 
@@ -35,7 +40,7 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
     return atRiskMembers.filter(
       (m) =>
         (activeSegments.size === 0 || activeSegments.has(m.segment)) &&
-        (activeTiers.size === 0 || activeTiers.has(m.tier))
+        (activeTiers.size === 0 || activeTiers.has(m.tier)),
     );
   }, [atRiskMembers, activeSegments, activeTiers]);
 
@@ -49,15 +54,16 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
         // float32 (predict_proba's dtype) and round-trips a hair below the
         // float64 value despite passing in the original comparison. Only
         // apply this filter once the operator actually raises the bar.
-        riskThreshold <= minThreshold || m.churn_probability >= riskThreshold
+        riskThreshold <= minThreshold || m.churn_probability >= riskThreshold,
     );
   }, [segmentTierFiltered, riskThreshold, minThreshold]);
 
-  const selectedMember = filtered.find((m) => m.member_id === selectedId) ?? null;
+  const selectedMember =
+    filtered.find((m) => m.member_id === selectedId) ?? null;
 
   const revenueAtRisk30d = useMemo(
     () => filtered.reduce((sum, m) => sum + m.annual_value_thb, 0) / 12,
-    [filtered]
+    [filtered],
   );
 
   function toggleSegment(segment: string) {
@@ -85,17 +91,24 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
   }
 
   const hasActiveFilters =
-    activeSegments.size > 0 || activeTiers.size > 0 || riskThreshold !== minThreshold;
+    activeSegments.size > 0 ||
+    activeTiers.size > 0 ||
+    riskThreshold !== minThreshold;
 
   return (
     <div className="space-y-6">
       <KpiRow
         items={[
-          { label: t("kpi.activeMembers"), value: formatCount(activeMemberCount, locale) },
+          {
+            label: t("kpi.activeMembers"),
+            value: formatCount(activeMemberCount, locale),
+          },
           {
             label: t("kpi.flaggedAtRisk"),
             value: formatCount(filtered.length, locale),
-            caption: hasActiveFilters ? t("kpi.flaggedCaptionFiltered") : t("kpi.flaggedCaptionThreshold"),
+            caption: hasActiveFilters
+              ? t("kpi.flaggedCaptionFiltered")
+              : t("kpi.flaggedCaptionThreshold"),
           },
           {
             label: t("kpi.revenueAtRisk"),
@@ -104,8 +117,14 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
           },
           {
             label: t("kpi.modelRecall"),
-            value: metrics ? `${(metrics.model_recall * 100).toFixed(0)}%` : "—",
-            caption: metrics ? tf("kpi.modelRecallCaption", { precision: (metrics.threshold_precision * 100).toFixed(0) }) : undefined,
+            value: metrics
+              ? `${(metrics.model_recall * 100).toFixed(0)}%`
+              : "—",
+            caption: metrics
+              ? tf("kpi.modelRecallCaption", {
+                  precision: (metrics.threshold_precision * 100).toFixed(0),
+                })
+              : undefined,
           },
         ]}
       />
@@ -125,7 +144,11 @@ export default function Dashboard({ atRiskMembers, segments, metrics, activeMemb
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
-        <AtRiskTable members={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+        <AtRiskTable
+          members={filtered}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+        />
         <div className="lg:sticky lg:top-6">
           <MemberDetailPanel member={selectedMember} />
         </div>

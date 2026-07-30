@@ -51,7 +51,11 @@ const ACTION_KEYS = {
  * Python wording. Falls back to the raw English sentence from Supabase
  * for an unrecognized segment, rather than showing nothing.
  */
-export function actionLabel(segment: string, rawAction: string, locale: Locale): string {
+export function actionLabel(
+  segment: string,
+  rawAction: string,
+  locale: Locale,
+): string {
   const key = ACTION_KEYS[segment as keyof typeof ACTION_KEYS];
   return key ? t(locale, key) : rawAction;
 }

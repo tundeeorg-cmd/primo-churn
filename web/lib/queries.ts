@@ -5,7 +5,13 @@
  */
 
 import { supabase } from "./supabase";
-import type { ActionRow, AtRiskMember, Member, Metrics, Segment } from "./supabase";
+import type {
+  ActionRow,
+  AtRiskMember,
+  Member,
+  Metrics,
+  Segment,
+} from "./supabase";
 
 // PostgREST caps a single response at 1000 rows by default — at_risk_members
 // has 2,260. Without paging, getAtRiskMembers() silently truncated to the
@@ -17,8 +23,11 @@ async function fetchAllPages<T>(
   // PromiseLike, not Promise — supabase-js's query builder is thenable but
   // isn't typed as a strict Promise (no .catch/.finally), so it doesn't
   // structurally satisfy Promise<...>.
-  queryFn: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
-  context: string
+  queryFn: (
+    from: number,
+    to: number,
+  ) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+  context: string,
 ): Promise<T[]> {
   const all: T[] = [];
   let start = 0;
@@ -41,7 +50,7 @@ export async function getAtRiskMembers(): Promise<AtRiskMember[]> {
         .select("*")
         .order("annual_value_thb", { ascending: false })
         .range(from, to),
-    "getAtRiskMembers"
+    "getAtRiskMembers",
   );
 }
 
@@ -55,12 +64,18 @@ export async function getSegments(): Promise<Segment[]> {
 }
 
 export async function getMetrics(): Promise<Metrics | null> {
-  const { data, error } = await supabase.from("metrics").select("*").eq("id", 1).maybeSingle();
+  const { data, error } = await supabase
+    .from("metrics")
+    .select("*")
+    .eq("id", 1)
+    .maybeSingle();
   if (error) throw new Error(`getMetrics: ${error.message}`);
   return data;
 }
 
-export async function getMemberDetail(memberId: string): Promise<Member | null> {
+export async function getMemberDetail(
+  memberId: string,
+): Promise<Member | null> {
   const { data, error } = await supabase
     .from("members")
     .select("*")
@@ -78,7 +93,9 @@ export async function getActions(): Promise<ActionRow[]> {
 
 /** Total scored population — the dashboard's "active members" KPI. */
 export async function getActiveMemberCount(): Promise<number> {
-  const { count, error } = await supabase.from("members").select("*", { count: "exact", head: true });
+  const { count, error } = await supabase
+    .from("members")
+    .select("*", { count: "exact", head: true });
   if (error) throw new Error(`getActiveMemberCount: ${error.message}`);
   return count ?? 0;
 }

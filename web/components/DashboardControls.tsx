@@ -39,7 +39,9 @@ export default function DashboardControls({
   return (
     <div className="rounded-xl border border-line bg-paper p-5 space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">{t("controls.filters")}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">
+          {t("controls.filters")}
+        </p>
         {hasActiveFilters && (
           <button
             type="button"
@@ -67,7 +69,9 @@ export default function DashboardControls({
                     ? "border-transparent text-white"
                     : "border-line text-ink-muted hover:border-navy/40"
                 }`}
-                style={active ? { backgroundColor: segmentColor(seg) } : undefined}
+                style={
+                  active ? { backgroundColor: segmentColor(seg) } : undefined
+                }
               >
                 {segmentLabel(seg, locale)}
               </button>

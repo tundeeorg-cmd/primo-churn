@@ -1,6 +1,13 @@
 "use client";
 
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import type { Segment } from "@/lib/supabase";
 import { SEGMENT_ORDER, segmentColor } from "@/lib/theme";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -41,7 +48,9 @@ function ChartTooltip({
             style={{ backgroundColor: segmentColor(p.dataKey) }}
           />
           <span className="text-ink">{segmentLabel(p.dataKey, locale)}</span>
-          <span className="tabular-figures text-ink-muted ml-auto">{formatCount(p.value, locale)}</span>
+          <span className="tabular-figures text-ink-muted ml-auto">
+            {formatCount(p.value, locale)}
+          </span>
         </div>
       ))}
     </div>
@@ -69,12 +78,26 @@ export default function SegmentBar({ segments }: Props) {
 
       <div style={{ width: "100%", height: 64 }}>
         <ResponsiveContainer>
-          <BarChart data={data} layout="vertical" barSize={28} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            barSize={28}
+            margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+          >
             <XAxis type="number" hide />
             <YAxis type="category" dataKey="name" hide />
-            <Tooltip content={<ChartTooltip locale={locale} />} cursor={{ fill: "transparent" }} />
+            <Tooltip
+              content={<ChartTooltip locale={locale} />}
+              cursor={{ fill: "transparent" }}
+            />
             {SEGMENT_ORDER.map((name) => (
-              <Bar key={name} dataKey={name} stackId="a" fill={segmentColor(name)} radius={0} />
+              <Bar
+                key={name}
+                dataKey={name}
+                stackId="a"
+                fill={segmentColor(name)}
+                radius={0}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>

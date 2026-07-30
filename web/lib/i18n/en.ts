@@ -29,7 +29,8 @@ export const en: Record<keyof typeof th, string> = {
   "kpi.modelRecallCaption": "at {precision}% precision",
 
   "table.emptyTitle": "No members match these filters",
-  "table.emptyBody": "Try lowering the risk threshold, or clear a segment/tier filter above.",
+  "table.emptyBody":
+    "Try lowering the risk threshold, or clear a segment/tier filter above.",
   "table.colMember": "Member",
   "table.colValueAtRisk": "Value at risk",
 
@@ -46,7 +47,8 @@ export const en: Record<keyof typeof th, string> = {
   "chart.heading": "Members by segment — {count} members",
 
   "detail.emptyTitle": "Select a member",
-  "detail.emptyBody": "Pick anyone from the list to see why they're at risk and what to do about it.",
+  "detail.emptyBody":
+    "Pick anyone from the list to see why they're at risk and what to do about it.",
   "detail.whyAtRisk": "Why they're at risk",
   "detail.churnProbability": "Churn probability",
   "detail.valueProtected": "Estimated value protected",
@@ -66,7 +68,8 @@ export const en: Record<keyof typeof th, string> = {
 
   "action.champions": "VIP perks, early access to new drinks, referral ask",
   "action.loyal": "Tier-up nudge, personalized bundle",
-  "action.atRiskRegulars": '15%-off win-back coupon + "we miss you" LINE mission',
+  "action.atRiskRegulars":
+    '15%-off win-back coupon + "we miss you" LINE mission',
   "action.hibernating": "Bounce-back free drink + one-question why-survey",
   "action.oneAndDone": "Onboarding mission, second-visit nudge",
 
@@ -138,7 +141,8 @@ export const en: Record<keyof typeof th, string> = {
 
   "stats.churnRate": "Churn rate",
 
-  "footer.brandTagline": "Churn prediction & member segmentation for loyalty programs.",
+  "footer.brandTagline":
+    "Churn prediction & member segmentation for loyalty programs.",
   "footer.stackTitle": "Built with",
   "footer.linksTitle": "Links",
 };
